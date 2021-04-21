@@ -86,10 +86,6 @@ def CreateBackgroundImage(Shape):
                     background_img[i:i+m.GRID_BOX_SIZE, j:j +
                                    m.GRID_BOX_SIZE] = [200, 200, 200]
 
-    # Adding the alpha channel
-    ## The alpha channel in the base image is of no importance but 
-    ## we will have to create it as the layers should have the alpha channel
-    background_img = CorrectImage(background_img)
 
     return background_img
 

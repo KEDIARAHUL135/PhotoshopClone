@@ -27,39 +27,26 @@ class _layer:
 
 
 
-def CreateBaseLayer(Shape):
-    # Creating the background image first (the checkered image)
-    BackgroundImage = image.CreateBackgroundImage(Shape)
-
-    # Creating the base layer
-    BaseLayer = _layer(BackgroundImage, Position=(0, 0), Name="Base Layer")
-
-    return BaseLayer
-
-
 # This class creates the main object of the project will all layers as list
 # This class contains the methods for manipulating the different layers together.
 class _connectedLayers:
     def __init__(self, **kwargs):
-        self.layers = []        # All layers will be stored in this list
+        self.backgroundImg = None   # Background image will be stored here
+        self.layers = []            # All the other layers will be stored in this list
 
-        if "layer" in kwargs:   # If layer is passed
+        if "layer" in kwargs:               # If layer is passed
             FirstLayer = kwargs["layer"]    # Getting the first layer
             
-            # Creating the base layer
-            BaseLayer = CreateBaseLayer(FirstLayer.Shape)
-
-            # Adding the 2 layers
-            self.layers.append(BaseLayer)
+            # Storing the background image
+            self.backgroundImg = image.CreateBackgroundImage(FirstLayer.Shape)
+            # Adding the first layer
             self.layers.append(FirstLayer)
 
-        # Adding only the base layer depending on the shape if passed
+        # Storing only the background image depending on the shape if passed
         elif "shape" in kwargs:
-            BaseLayer = CreateBaseLayer(kwargs["shape"])
-            self.layers.append(BaseLayer)
+            self.backgroundImg = image.CreateBackgroundImage(kwargs["shape"])
         else:
-            BaseLayer = CreateBaseLayer([m.DEFAULT_CANVAS_HEIGHT, m.DEFAULT_CANVAS_WIDTH])
-            self.layers.append(BaseLayer)
+            self.backgroundImg = image.CreateBackgroundImage([m.DEFAULT_CANVAS_HEIGHT, m.DEFAULT_CANVAS_WIDTH])
         
 
 

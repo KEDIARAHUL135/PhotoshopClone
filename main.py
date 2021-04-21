@@ -48,7 +48,6 @@ if __name__ == "__main__":
 
         # Showing all layers
         ### Show all layers
-        cv2.imshow(window_title, all_layers.layers[-1].Image)       # Showing last layer for testing
         key_pressed = cv2.waitKey(0)
         action_str = action[key_pressed]
         
