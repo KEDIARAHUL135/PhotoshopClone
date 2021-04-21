@@ -2,7 +2,8 @@ import cv2
 import numpy as np
 import argparse
 
-import macros
+import layers
+import macros as m
 from pressed_key_lookup import *
 
 
@@ -15,9 +16,11 @@ def ArgParse():
     
     ap.add_argument("-img", "--ImagePath", default=None,
                     help="Path of the image file.")
+    ap.add_argument("-s", "--Shape", default=None, type=int, nargs=2,
+                    help="Shape of the canvas(integer values only) - [height, width]")
 
     args = vars(ap.parse_args())            # Converting it to dictionary.
-
+    
 
 
 # Printing the action statements for the user to select a tool/feature
@@ -35,16 +38,17 @@ if __name__ == "__main__":
     ArgParse()          # Parsing command line arguments
 
     # Reading and initializing the image
-    all_layers = layer.Initialize(args)
+    all_layers = layers.Initialize(args)
 
     while True:
-        window_title = DEFAULT_TITLE_OF_CANVAS
+        window_title = m.DEFAULT_CANVAS_TITLE
 
         # Printing 
         PrintActionStatements()
 
         # Showing all layers
         ### Show all layers
+        cv2.imshow(window_title, all_layers.layers[-1].Image)       # Showing last layer for testing
         key_pressed = cv2.waitKey(0)
         action_str = action[key_pressed]
         

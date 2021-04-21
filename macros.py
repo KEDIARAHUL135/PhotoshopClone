@@ -1,7 +1,11 @@
 # Default size of new image
-IMAGE_DEFAULT_HEIGHT = 750
-IMAGE_DEFAULT_WIDTH = 1200
+DEFAULT_CANVAS_HEIGHT = 750
+DEFAULT_CANVAS_WIDTH = 1500
 
 
 # The default title of the mian canvas
-DEFAULT_TITLE_OF_CANVAS = "Main"
+DEFAULT_CANVAS_TITLE = "Main"
+
+
+# The size of the grid box of the base layer
+GRID_BOX_SIZE = 5

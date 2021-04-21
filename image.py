@@ -2,6 +2,8 @@ import os
 import cv2
 import numpy as np
 
+import macros as m
+
 
 # Adds alpha channel to the image
 def AddAlphaChannel(Image, mask=None):
@@ -18,6 +20,7 @@ def AddAlphaChannel(Image, mask=None):
         else:
             MaskImage = np.ones((Image.shape[:2]), dtype=np.uint8) * 255
 
+    # Adding the alpha channel to the image
     b, g, r = cv2.split(Image)
     Image = cv2.merge((b, g, r, MaskImage))
 
@@ -64,3 +67,29 @@ def ReadImage(ImagePath):
     Image = CorrectImage(Image)
 
     return Image
+
+
+def CreateBackgroundImage(Shape):
+    h, w = Shape
+
+    # Creating the checkered image
+    background_img = np.ones((h, w, 3), dtype=np.uint8) * 255
+
+    for i in range(0, h, m.GRID_BOX_SIZE):
+        for j in range(0, w, m.GRID_BOX_SIZE):
+            if ((i+1) // m.GRID_BOX_SIZE) % 2 == 0:
+                if ((j+1) // m.GRID_BOX_SIZE) % 2 != 0:
+                    background_img[i:i+m.GRID_BOX_SIZE, j:j +
+                                   m.GRID_BOX_SIZE] = [200, 200, 200]
+            else:
+                if ((j+1) // m.GRID_BOX_SIZE) % 2 == 0:
+                    background_img[i:i+m.GRID_BOX_SIZE, j:j +
+                                   m.GRID_BOX_SIZE] = [200, 200, 200]
+
+    # Adding the alpha channel
+    ## The alpha channel in the base image is of no importance but 
+    ## we will have to create it as the layers should have the alpha channel
+    background_img = CorrectImage(background_img)
+
+    return background_img
+
