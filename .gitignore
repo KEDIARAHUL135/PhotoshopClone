@@ -1,0 +1,4 @@
+# Python extra files
+/.vscode
+/__pycache__
+/.pylintrc
