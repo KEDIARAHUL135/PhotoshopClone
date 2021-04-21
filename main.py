@@ -13,7 +13,8 @@ def ArgParse():
     # construct the argument parser and parse the arguments
     ap = argparse.ArgumentParser()
     
-    #### Add arguments here
+    ap.add_argument("-img", "--ImagePath", default=None,
+                    help="Path of the image file.")
 
     args = vars(ap.parse_args())            # Converting it to dictionary.
 
@@ -33,7 +34,8 @@ def PrintActionStatements():
 if __name__ == "__main__":
     ArgParse()          # Parsing command line arguments
 
-    # Initialize the code here
+    # Reading and initializing the image
+    all_layers = layer.Initialize(args)
 
     while True:
         window_title = DEFAULT_TITLE_OF_CANVAS
