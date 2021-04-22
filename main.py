@@ -4,6 +4,7 @@ import argparse
 
 import layers
 import macros as m
+import input_output
 from pressed_key_lookup import *
 
 
@@ -54,10 +55,11 @@ if __name__ == "__main__":
         if action_str is None:                      # Continue if valid key is not pressed
             continue
 
+        elif action_str == "ADD_LAYER":             # Add a new layer
+            input_output.AddNewLayer(all_layers)
+
         elif action_str == "BREAK":                 # Breaking
             break
-
-        ### elif conditions here to check for input
 
 
     cv2.destroyAllWindows()
