@@ -58,6 +58,9 @@ if __name__ == "__main__":
         elif action_str == "ADD_LAYER":             # Add a new layer
             input_output.AddNewLayer(all_layers)
 
+        elif action_str == "SHOW_SELECTED_LAYERS":  # Show selected layers
+            input_output.ChooseLayersToShow(all_layers, "Layers selection")
+
         elif action_str == "BREAK":                 # Breaking
             break
 

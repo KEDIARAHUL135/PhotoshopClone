@@ -10,7 +10,7 @@ import helping_functions as hf
 
 # This class contains the details and objects about a single layer only
 class _layer:
-    def __init__(self, Image, IsVisible=True, Position=(0, 0), Name=None):
+    def __init__(self, Image, IsVisible=True, Position=[0, 0], Name=None):
         self.Image = Image
         self.CheckImage()
         
@@ -26,6 +26,13 @@ class _layer:
         if c != 4:
             raise TypeError("Image should be 4 channeled.")
 
+
+    def Copy(self):
+        Layer_copy = _layer(self.Image.copy(), IsVisible=self.IsVisible, 
+                            Position=self.Position.copy(),
+                            Name=''.join(self.Name))
+
+        return Layer_copy
 
 
 # This class creates the main object of the project will all layers as list
@@ -59,7 +66,7 @@ class _connectedLayers:
 
     def CombineLayers(self):
         # Taking the background first
-        self.CombinedImage = self.BackgroundImg
+        self.CombinedImage = self.BackgroundImg.copy()
 
         # Combine layers one by one
         for i in range(len(self.layers)):
@@ -100,6 +107,30 @@ class _connectedLayers:
         cv2.imshow(Title, self.CombinedImage)
 
 
+    def PrintLayerNames(self):
+        # Print layer names except backgroud layer name.
+        print("\nLayers present are:")
+        for i in range(len(self.layers)):
+            print("{} : {}".format(i, self.layers[i].Name))
+
+    
+    def Copy(self, copyTo=None):
+        if copyTo is None:
+            all_layers_copy = _connectedLayers(shape=self.Shape)
+        else:
+            all_layers_copy = copyTo
+
+        all_layers_copy.layers = [self.layers[i].Copy() for i in range(len(self.layers))]
+
+
+        # Copying all other data of all_layers
+        all_layers_copy.BackgroundImg = self.BackgroundImg.copy()     # Images can be copied like this
+        all_layers_copy.Shape = self.Shape + tuple()
+        all_layers_copy.CombinedImage = self.CombinedImage.copy()
+        
+        return all_layers_copy
+
+
 
 # Initializes the project layers
 def Initialize(args):
@@ -112,7 +143,7 @@ def Initialize(args):
             exit()
 
         # Creating the first layer and all_layers object
-        FirstLayer = _layer(Img, Name="Layer 0", Position=(0, 0))
+        FirstLayer = _layer(Img, Name="Layer 0", Position=[0, 0])
         all_layers = _connectedLayers(layer=FirstLayer)
 
     else:
