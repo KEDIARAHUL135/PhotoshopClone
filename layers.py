@@ -4,6 +4,7 @@ import numpy as np
 
 import image
 import macros as m
+import helping_functions as hf
 
 
 
@@ -55,7 +56,49 @@ class _connectedLayers:
         NewLayer = _layer(Image, Name="Layer " + str(len(self.layers)))
         self.layers.append(NewLayer)
 
-        
+
+    def CombineLayers(self):
+        # Taking the background first
+        self.CombinedImage = self.BackgroundImg
+
+        # Combine layers one by one
+        for i in range(len(self.layers)):
+            # Combining if it is marked visible.
+            if self.layers[i].IsVisible:
+
+                # Getting image roi and canvas roi
+                Image_ROI, Canvas_ROI = hf.Get_Img_Canvas_ROI(list(self.layers[i].Position) + list(self.layers[i].Shape)[::-1], self.Shape)
+                if Image_ROI is None:   # If image completely lies outside the canvas
+                    continue
+                i_x, i_y, i_w, i_h = Image_ROI
+                c_x, c_y, c_w, c_h = Canvas_ROI
+                Image_ROI_img = self.layers[i].Image[i_y : i_y + i_h, i_x : i_x + i_w].copy()
+                Canvas_ROI_img = self.CombinedImage[c_y : c_y + c_h, c_x : c_x + c_w].copy()
+
+                # Extracting alpha channel, normalising it to range 0-1.
+                alpha = Image_ROI_img[:, :, [-1]].astype(float)/255
+                # Creating 3 channeled image from alpha channel
+                alpha = cv2.merge((alpha, alpha, alpha))
+
+                # Combining layer to the previously combined layers.
+                self.CombinedImage[c_y : c_y + c_h, c_x : c_x + c_w] = cv2.add(cv2.multiply(alpha, Image_ROI_img[:, :, :-1], dtype=cv2.CV_64F),
+                                                                               cv2.multiply(1.0 - alpha, Canvas_ROI_img, dtype=cv2.CV_64F))
+
+        # Converting it to unsigned int.
+        self.CombinedImage = np.uint8(self.CombinedImage)
+
+
+    def Show(self, Title=m.DEFAULT_CANVAS_TITLE):
+        # Checking title type. It should be string.
+        if type(Title) != str:
+            raise TypeError("Title must be a string.")
+
+        # Combining all layers
+        self.CombineLayers()
+
+        # Showing the combined layers.
+        cv2.imshow(Title, self.CombinedImage)
+
 
 
 # Initializes the project layers

@@ -48,7 +48,7 @@ if __name__ == "__main__":
         PrintActionStatements()
 
         # Showing all layers
-        ### Show all layers
+        all_layers.Show()
         key_pressed = cv2.waitKey(0)
         action_str = action[key_pressed]
         
