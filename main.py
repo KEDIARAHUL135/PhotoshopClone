@@ -5,6 +5,7 @@ import argparse
 import layers
 import macros as m
 import input_output
+import helping_functions as hf
 from pressed_key_lookup import *
 
 
@@ -42,9 +43,13 @@ if __name__ == "__main__":
     all_layers = layers.Initialize(args)
 
     while True:
+        # Clearing the screen
+        hf.Clear()
+    
+        # Setting window title
         window_title = m.DEFAULT_CANVAS_TITLE
 
-        # Printing 
+        # Printing action statements for the user
         PrintActionStatements()
 
         # Showing all layers

@@ -1,3 +1,5 @@
+import os
+
 
 def Get_Img_Canvas_ROI(ImageRect, CanvasShape):
     # Position of image on the canvas
@@ -45,3 +47,14 @@ def Get_Img_Canvas_ROI(ImageRect, CanvasShape):
     
     
     return [i_roi_x, i_roi_y, i_roi_w, i_roi_h], [c_roi_x, c_roi_y, c_roi_w, c_roi_h]
+
+
+
+def Clear():
+    # for windows
+    if os.name == 'nt':
+        _ = os.system('cls')
+
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = os.system('clear')
