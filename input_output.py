@@ -166,7 +166,7 @@ def RearrangeLayers(all_layers, window_title):
     all_layers_copy = all_layers.Copy()
 
     # Checking if at least 1 layer is present so that it can be deleted.
-    if len(all_layers_copy.layers) <= 2:
+    if len(all_layers_copy.layers) < 2:
         print("\nNot enough layers to rearrange. There should be atleast 2 layer.\n")
         return
 
