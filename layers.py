@@ -150,6 +150,15 @@ class _connectedLayers:
                     self.layers[layer_no].IsVisible = False
 
 
+    def DeleteLayers(self, layer_nos):
+        # Sorting layer_nos in decreasing order
+        layer_nos = sorted(layer_nos, reverse=True)
+
+        # Deleting the layers
+        for layer_no in layer_nos:
+            del self.layers[layer_no]
+
+
     def ExchangeLayers(self, l1, l2):
         self.layers[l1], self.layers[l2] = self.layers[l2], self.layers[l1]
 

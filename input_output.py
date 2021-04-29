@@ -68,7 +68,7 @@ def ChooseLayersToShow(all_layers, window_title):
         print("\nYou should have atleast 1 layer to show/hide layers.\n")
         return
 
-    print("\nPass the layer numbers (comma(',') separated) you wish to see.")
+    print("\nEnter the layer numbers (comma(',') separated) you wish to see.")
     print("-1 for all layers and -2 for no layer.\n")
     all_layers.PrintLayerNames()
 
@@ -108,6 +108,56 @@ def ChooseLayersToShow(all_layers, window_title):
     hf.Sleep()
 
     return
+
+
+def DeleteLayers(all_layers, window_title):
+    # Storing initial layers data
+    all_layers_copy = all_layers.Copy()
+
+    # Checking if at least 1 layer is present so that it can be deleted.
+    if len(all_layers_copy.layers) < 1:
+        print("\nNot enough layers to delete. There should be atleast 1 layer.\n")
+        return
+
+    print("\nEnter the layer numbers (comma (',') separated) you wish to delete.")
+
+    IsAborted = False
+    while True:
+        all_layers_copy.PrintLayerNames()
+        # Showing layers
+        all_layers_copy.Show(Title=window_title)
+        cv2.waitKey(1)
+
+        command = input("\nEnter 'Y'/'N' to confirm/abort deletion else enter any other key to continue: ")
+
+        if 'y' in command or 'Y' in command:    # if 'y'/'Y' entered -> Confirm deletion
+            break
+
+        elif 'n' in command or 'N' in command:  # If 'n'/'N' entered -> Abort deletion
+            IsAborted = True
+            break
+
+        # Asking for layer numbers cand checking if valid numbers passed.
+        layer_nos = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        if layer_nos is None:                   # layer_nos = None if invalid layer nos entered
+            continue
+
+        # Ask again if less than 1 layer numbers entered.
+        if len(layer_nos) < 1:
+            print("Invalid number of layer numbers entered. Enter atleast 1 numbers.")
+            continue
+
+        # Delete layer corresponding to passed layer numbers.
+        all_layers_copy.DeleteLayers(layer_nos)
+
+    if IsAborted:
+        print("\nDeleting of layers aborted.\n")
+
+    else:
+        print("\nDeleting of layers successful.\n")
+        all_layers_copy.Copy(copyTo=all_layers)
+
+    cv2.destroyWindow(window_title)
 
 
 
@@ -165,6 +215,7 @@ def LayerProcesses(all_layers, window_title):
     while True:
         print()
         print("Enter 'R' to rearrange layers.")
+        print("Enter 'D' to delete layers.")
 
         command = input("\nEnter command: ")
         command = command.replace(" ", "")
@@ -175,6 +226,10 @@ def LayerProcesses(all_layers, window_title):
 
         elif 'r' in command or 'R' in command:      # 'r'/'R' entered -> Rearrange layers
             RearrangeLayers(all_layers, window_title)
+            break
+
+        elif 'd' in command or 'D' in command:      # 'd'/'D' entered -> Delete layers
+            DeleteLayers(all_layers, window_title)
             break
         
         else:                                       # If invalid command is passed.
