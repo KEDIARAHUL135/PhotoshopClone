@@ -163,6 +163,37 @@ class _connectedLayers:
         self.layers[l1], self.layers[l2] = self.layers[l2], self.layers[l1]
 
 
+    def MergeLayers(self, layer_nos):
+        # Storting layer numbers in increasing order
+        layer_nos = sorted(layer_nos)
+        # Merged layer will be stored in place of the top-most 
+        # layer's pos among the layers which are being merged.
+        merged_layer_no = layer_nos[-1]
+        
+        # Getting Merged layer name. (Merged: l1_name + l2_name + ....)
+        merged_layer_name = "Merged: "
+        for i in layer_nos:
+            merged_layer_name = merged_layer_name + self.layers[i].Name + " + "
+        merged_layer_name = merged_layer_name[:-3]      # Removing last " + "
+
+
+        # Joining/Merging all images and getting merged image position.
+        merged_img, merged_img_pos, merged_img_shape = JoinImages([self.layers[i].Image.copy() for i in layer_nos], 
+                                                                  [self.layers[i].Position for i in layer_nos],
+                                                                  [self.layers[i].Shape for i in layer_nos])
+
+        # Storing merged layers data.
+        self.layers[merged_layer_no].Image = merged_img
+        self.layers[merged_layer_no].IsVisible = True
+        self.layers[merged_layer_no].Position = merged_img_pos
+        self.layers[merged_layer_no].Shape = merged_img_shape
+        self.layers[merged_layer_no].Name = merged_layer_name
+        
+        # Deleting all the remaining layers.
+        self.DeleteLayers(layer_nos[:-1])
+
+
+
 # Initializes the project layers
 def Initialize(args):
     if args["ImagePath"] is not None:       # If image path is passed
@@ -189,3 +220,58 @@ def Initialize(args):
 
 
     return all_layers
+
+
+def JoinImages(Images, ImagePositions, ImageShapes):
+    x1, y1, = np.transpose(np.asarray(ImagePositions))
+    h, w = np.transpose(np.asarray(ImageShapes))
+
+    # Join images and create a single big image.
+
+    # Convert image position format - [x, y, w, h] -> [x1, y1, x2, y2]
+    x2, y2 = hf.to_xyxy(x1, y1, w, h)
+
+    # Storing the initial image and its position
+    joined_img = Images[0]
+    joined_img_pos1 = [x1[0], y1[0]]
+    joined_img_pos2 = [x2[0], y2[0]]
+
+    for i in range(1, len(Images)):
+        # [x1_, y1_, x2_, y2_] - Position of combined big image in the canvas
+        x1_ = min(joined_img_pos1[0], x1[i])
+        y1_ = min(joined_img_pos1[1], y1[i])
+        x2_ = max(joined_img_pos2[0], x2[i])
+        y2_ = max(joined_img_pos2[1], y2[i])
+
+
+        # Relative positions of both the images wrt the combined image - rel_i1_posi, rel_i2_posi
+        ri1x1, ri1y1 = joined_img_pos1[0] - x1_, joined_img_pos1[1] - y1_
+        ri1x2, ri1y2 = joined_img_pos2[0] - x1_, joined_img_pos2[1] - y1_
+        ri2x1, ri2y1 = x1[i] - x1_, y1[i] - y1_
+        ri2x2, ri2y2 = x2[i] - x1_, y2[i] - y1_
+
+        # Combining both images to the joined image.
+        new_img = np.zeros((y2_ - y1_ + 1, x2_ - x1_ + 1, 4), dtype=np.uint8)
+        # First image (lower image) is added directly
+        new_img[ri1y1 : ri1y2 + 1, ri1x1 : ri1x2 + 1] = joined_img.copy()
+        # Second image (upper image) is added wrt the alpha channel
+        alpha = Images[i][:, :, [-1]].astype(float)/255
+        alpha = cv2.merge((alpha, alpha, alpha))
+        new_img[ri2y1 : ri2y2 + 1, ri2x1 : ri2x2 + 1, :-1] = \
+                                            cv2.add(cv2.multiply(alpha, Images[i][:, :, :-1], dtype=cv2.CV_64F),
+                                                    cv2.multiply(1.0 - alpha, new_img[ri2y1 : ri2y2 + 1, 
+                                                                                      ri2x1 : ri2x2 + 1, :-1], 
+                                                                 dtype=cv2.CV_64F))
+        new_img[ri2y1 : ri2y2 + 1, ri2x1 : ri2x2 + 1, -1] = cv2.max(Images[i][:, :, [-1]], new_img[ri2y1 : ri2y2 + 1, ri2x1 : ri2x2 + 1, [-1]])
+
+        # For next iteration, first image = current combined image.
+        joined_img_pos1 = [x1_, y1_]
+        joined_img_pos2 = [x2_, y2_]
+        joined_img = new_img.copy()
+
+    # Convert image position back to previous format
+    ji_x1, ji_y1 = joined_img_pos1[0], joined_img_pos1[1]
+    ji_w, ji_h = hf.to_xywh(ji_x1, ji_y1, joined_img_pos2[0], joined_img_pos2[1])
+
+    return joined_img, [ji_x1, ji_y1], [ji_h, ji_w]
+

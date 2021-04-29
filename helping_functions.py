@@ -1,5 +1,6 @@
 import os
 import time
+import numpy as np
 
 
 def Get_Img_Canvas_ROI(ImageRect, CanvasShape):
@@ -62,3 +63,18 @@ def Clear():
 
 def Sleep(Duration=1):
     time.sleep(Duration)
+
+
+def to_xyxy(x, y, w, h):
+    x2 = x + w - 1
+    y2 = y + h - 1
+
+    return x2, y2
+
+
+def to_xywh(x1, y1, x2, y2):
+    w = x2 - x1 + 1
+    h = y2 - y1 + 1
+
+    return w, h
+

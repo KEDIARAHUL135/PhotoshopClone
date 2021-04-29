@@ -211,11 +211,62 @@ def RearrangeLayers(all_layers, window_title):
     cv2.destroyWindow(window_title)
 
 
+def MergeLayers(all_layers, window_title):
+    # Copying layer's data.
+    all_layers_copy = all_layers.Copy()
+
+    # Checking if at least 2 layers present.
+    if len(all_layers_copy.layers) < 2:
+        print("\nNot enough layers to merge. There should be atleast 2 layer.\n")
+        return
+
+    print("\nEnter 2 comma(',') separated numbers of the layer you want to merge.")
+
+    IsAborted = False
+    while True:
+        all_layers_copy.PrintLayerNames()
+        all_layers_copy.Show(Title=window_title)
+        cv2.waitKey(1)
+
+        layer_nos = input("\nEnter 'Y'/'N' to confirm/abort rearrangement else enter any other key to continue: ")
+
+        if 'y' in layer_nos or 'Y' in layer_nos:    # if 'y'/'Y' entered -> Confirm merge
+            break
+
+        elif 'n' in layer_nos or 'N' in layer_nos:  # if 'n'/'N' entered -> Abort merge
+            IsAborted = True
+            break
+
+        # Asking for layer numbers and checking if valid numbers passed.
+        layer_nos = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        if layer_nos is None:                       # layer_nos = None if invalid layer nos entered
+            continue
+
+        # Ask again if less than 2 layer numbers passed.
+        # Because atleast 2 layers should be there to merge.
+        if len(layer_nos) < 2:
+            print("Invalid number of layer numbers entered. Enter atleast 2 numbers.")
+            continue
+
+        # Merge layers.
+        all_layers_copy.MergeLayers(layer_nos)
+
+    if IsAborted:
+        print("\nMerging of layers aborted.\n")
+
+    else:
+        print("\nMerging of layers successful.\n")
+        all_layers_copy.Copy(copyTo=all_layers)
+
+    cv2.destroyWindow(window_title)
+
+
 def LayerProcesses(all_layers, window_title):
     while True:
         print()
         print("Enter 'R' to rearrange layers.")
         print("Enter 'D' to delete layers.")
+        print("Enter 'M' to merge layers.")
 
         command = input("\nEnter command: ")
         command = command.replace(" ", "")
@@ -230,6 +281,10 @@ def LayerProcesses(all_layers, window_title):
 
         elif 'd' in command or 'D' in command:      # 'd'/'D' entered -> Delete layers
             DeleteLayers(all_layers, window_title)
+            break
+
+        elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Merge layers
+            MergeLayers(all_layers, window_title)
             break
         
         else:                                       # If invalid command is passed.
