@@ -130,6 +130,26 @@ class _connectedLayers:
         
         return all_layers_copy
 
+    def SetLayersVisibility(self, layer_nos):
+        # If -1 entered - Show all layers
+        if layer_nos.count(-1) != 0:
+            for i in range(len(self.layers)):
+                self.layers[i].IsVisible = True
+
+        # If -2 entered - Show no layer
+        elif layer_nos.count(-2) != 0:  
+            for i in range(len(self.layers)):
+                self.layers[i].IsVisible = False
+        
+        # If valid layer numbers passed, show them
+        else:
+            for layer_no in range(len(self.layers)):
+                if layer_nos.count(layer_no):
+                    self.layers[layer_no].IsVisible = True
+                else:
+                    self.layers[layer_no].IsVisible = False
+
+
 
 
 # Initializes the project layers

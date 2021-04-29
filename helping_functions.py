@@ -1,4 +1,5 @@
 import os
+import time
 
 
 def Get_Img_Canvas_ROI(ImageRect, CanvasShape):
@@ -58,3 +59,6 @@ def Clear():
     # for mac and linux(here, os.name is 'posix')
     else:
         _ = os.system('clear')
+
+def Sleep(Duration=1.5):
+    time.sleep(Duration)

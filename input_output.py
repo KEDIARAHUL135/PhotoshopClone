@@ -30,14 +30,9 @@ def AddNewLayer(all_layers):
 
 def AskForLayerNumbers(a, b):
     # range [a, b] denotes the acceptable values of layer numbers 
-    print("\nYou can enter '@' to abort this process")
     while True:
         # Asking user layer numbers
         nos = input("Enter layer numbers: ")
-
-        # If - abort
-        if '@' in nos:
-            return '@'
 
         # Getting list of numbers passed. Error is thrown if invalid character passed.
         try:
@@ -58,9 +53,7 @@ def AskForLayerNumbers(a, b):
     if nos is None:
         print("\nNo numbers passed")
         return None
-    if type(nos) == str:
-        return '@'
-    if len(nos) == 0:
+    elif len(nos) == 0:
         print("\nNo numbers passed")
         return None
     
@@ -82,43 +75,34 @@ def ChooseLayersToShow(all_layers, window_title):
 
     IsAborted = False
     while True:
-        print("\nPress 'Y' to confirm else press any other key to select different set of layers.")
         all_layers_copy.Show(Title=window_title)
-        key = cv2.waitKey(0)
+        key = cv2.waitKey(1)
+
+        command = input("\nEnter 'Y/N' to confirm/abort arrangement else enter any other key to select different set of layers: ")
         
-        if key == 89 or key == 121:     # 'Y' or 'y' is pressed.
+        if 'Y' in command or 'y' in command:        # 'Y' or 'y' is pressed. - confirm
+            break
+        elif 'N' in command or 'n' in command:      # 'Y' or 'y' is pressed. - confirm
+            IsAborted = True
             break
         
         # Asking for layer nos and checking if valid umbers passed
         layer_nos = AskForLayerNumbers(-2, len(all_layers_copy.layers) - 1)
-        if type(layer_nos) == str:
-            IsAborted = True
-            break
         if layer_nos is None:           # layer_nos = None if invalid layer nos entered
             continue
 
-        if layer_nos.count(-1) != 0:     # If -1 entered - Show all layers
-            for i in range(len(all_layers_copy.layers)):
-                all_layers_copy.layers[i].IsVisible = True
-
-        elif layer_nos.count(-2) != 0:  # If -2 entered - Show no layer
-            for i in range(len(all_layers_copy.layers)):
-                all_layers_copy.layers[i].IsVisible = False
+        # Setting layers' visibility as asked
+        all_layers_copy.SetLayersVisibility(layer_nos)
         
-        else:                           # If valid layer numbers passed, show them
-            for layer_no in range(len(all_layers_copy.layers)):
-                if layer_nos.count(layer_no):
-                    all_layers_copy.layers[layer_no].IsVisible = True
-                else:
-                    all_layers_copy.layers[layer_no].IsVisible = False
-
     if IsAborted:
-        print("Choosing of layers aborted.\n")
+        print("\nChoosing of layers aborted.\n")
 
     else:
-        print("Choosing of layers successful.\n")
+        print("\nChoosing of layers successful.\n")
         all_layers_copy.Copy(copyTo=all_layers)
 
     cv2.destroyWindow(window_title)
+
+    hf.Sleep()
 
     return
