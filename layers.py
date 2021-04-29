@@ -193,6 +193,11 @@ class _connectedLayers:
         self.DeleteLayers(layer_nos[:-1])
 
 
+    def RenameLayer(self, layer_no, rename_to):
+        # Renaming the layer.
+        self.layers[layer_no].Name = rename_to
+
+
 
 # Initializes the project layers
 def Initialize(args):
