@@ -150,6 +150,8 @@ class _connectedLayers:
                     self.layers[layer_no].IsVisible = False
 
 
+    def ExchangeLayers(self, l1, l2):
+        self.layers[l1], self.layers[l2] = self.layers[l2], self.layers[l1]
 
 
 # Initializes the project layers

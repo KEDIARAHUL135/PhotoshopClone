@@ -27,6 +27,8 @@ def AddNewLayer(all_layers):
 
         break
 
+    hf.Sleep()
+
 
 def AskForLayerNumbers(a, b):
     # range [a, b] denotes the acceptable values of layer numbers 
@@ -103,6 +105,83 @@ def ChooseLayersToShow(all_layers, window_title):
 
     cv2.destroyWindow(window_title)
 
+    hf.Sleep()
+
+    return
+
+
+
+def RearrangeLayers(all_layers, window_title):
+    # Copying layer's data.
+    all_layers_copy = all_layers.Copy()
+
+    # Checking if at least 1 layer is present so that it can be deleted.
+    if len(all_layers_copy.layers) <= 2:
+        print("\nNot enough layers to rearrange. There should be atleast 2 layer.\n")
+        return
+
+    print("\nEnter 2 comma(',') separated numbers of the layer you want to exchange.")
+
+    IsAborted = False
+    while True:
+        all_layers_copy.PrintLayerNames()
+        all_layers_copy.Show(Title=window_title)
+        cv2.waitKey(1)
+
+        command = input("\nEnter 'Y'/'N' to confirm/abort rearrangement else enter any other key to continue: ")
+
+        if 'y' in command or 'Y' in command:    # if 'y'/'Y' entered -> Confirm rearrange
+            break
+
+        elif 'n' in command or 'N' in command:  # if 'n'/'N' entered -> Abort rearrange
+            IsAborted = True
+            break
+
+        # Asking for layer numbers cand checking if valid numbers passed.
+        layer_nos = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        if layer_nos is None:                   # layer_nos = None if invalid layer nos entered
+            continue
+
+        # If more or less than two layer numbers passed, ask again
+        # Because 2 layer are exchanged in positions at a time.
+        if len(layer_nos) != 2 :
+            print("Invalid number of layer numbers entered. Enter exactly 2 numbers.")
+            continue
+
+        # Exchange layers.
+        all_layers_copy.ExchangeLayers(layer_nos[0], layer_nos[1])
+
+    if IsAborted:
+        print("\nRearranging of layers aborted.\n")
+
+    else:
+        print("\nRearranging of layers successful.\n")
+        all_layers_copy.Copy(copyTo=all_layers)
+
+    cv2.destroyWindow(window_title)
+
+
+def LayerProcesses(all_layers, window_title):
+    while True:
+        print()
+        print("Enter 'R' to rearrange layers.")
+
+        command = input("\nEnter command: ")
+        command = command.replace(" ", "")
+
+        if len(command) > 1:                        # If more than 1 command entered.
+            print("Too many commands entered. Enter only one command.\n")
+            continue
+
+        elif 'r' in command or 'R' in command:      # 'r'/'R' entered -> Rearrange layers
+            RearrangeLayers(all_layers, window_title)
+            break
+        
+        else:                                       # If invalid command is passed.
+            print("Invalid command passed. Enter command again.\n")
+            continue
+        
+    cv2.destroyWindow(window_title)
     hf.Sleep()
 
     return

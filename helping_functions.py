@@ -60,5 +60,5 @@ def Clear():
     else:
         _ = os.system('clear')
 
-def Sleep(Duration=1.5):
+def Sleep(Duration=1):
     time.sleep(Duration)

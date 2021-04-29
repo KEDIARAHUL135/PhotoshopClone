@@ -66,8 +66,14 @@ if __name__ == "__main__":
         elif action_str == "SHOW_SELECTED_LAYERS":  # Show selected layers
             input_output.ChooseLayersToShow(all_layers, "Layers selection")
 
+        elif action_str == "LAYER_PROCESSES":       # Rearrange/ merge or delete layers
+            input_output.LayerProcesses(all_layers, "Layer processes")
+
         elif action_str == "BREAK":                 # Breaking
             break
 
 
     cv2.destroyAllWindows()
+
+    # Clearing the screen
+    hf.Clear()
