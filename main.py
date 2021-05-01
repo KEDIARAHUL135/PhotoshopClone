@@ -40,7 +40,7 @@ if __name__ == "__main__":
     ArgParse()          # Parsing command line arguments
 
     # Reading and initializing the image
-    all_layers = layers.Initialize(args)
+    Canvas = layers.Initialize(args)
 
     while True:
         # Clearing the screen
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         PrintActionStatements()
 
         # Showing all layers
-        all_layers.Show()
+        Canvas.Show()
         key_pressed = cv2.waitKey(0)
         action_str = action[key_pressed]
         
@@ -61,13 +61,13 @@ if __name__ == "__main__":
             continue
 
         elif action_str == "ADD_LAYER":             # Add a new layer
-            input_output.AddNewLayer(all_layers)
+            input_output.AddNewLayer(Canvas)
 
         elif action_str == "SHOW_SELECTED_LAYERS":  # Show selected layers
-            input_output.ChooseLayersToShow(all_layers, "Layers selection")
+            input_output.ChooseLayersToShow(Canvas, "Layers selection")
 
         elif action_str == "LAYER_OPERATIONS":       # Rearrange/ merge or delete layers
-            input_output.LayerOperations(all_layers, "Layer operations")
+            input_output.LayerOperations(Canvas, "Layer operations")
 
         elif action_str == "BREAK":                 # Breaking
             break

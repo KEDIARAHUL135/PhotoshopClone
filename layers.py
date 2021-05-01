@@ -37,7 +37,7 @@ class _layer:
 
 # This class creates the main object of the project will all layers as list
 # This class contains the methods for manipulating the different layers together.
-class _connectedLayers:
+class _canvas:
     def __init__(self, **kwargs):
         self.BackgroundImg = None   # Background image will be stored here
         self.layers = []            # All the other layers will be stored in this list
@@ -116,19 +116,19 @@ class _connectedLayers:
     
     def Copy(self, copyTo=None):
         if copyTo is None:
-            all_layers_copy = _connectedLayers(shape=self.Shape)
+            Canvas_copy = _canvas(shape=self.Shape)
         else:
-            all_layers_copy = copyTo
+            Canvas_copy = copyTo
 
-        all_layers_copy.layers = [self.layers[i].Copy() for i in range(len(self.layers))]
+        Canvas_copy.layers = [self.layers[i].Copy() for i in range(len(self.layers))]
 
 
-        # Copying all other data of all_layers
-        all_layers_copy.BackgroundImg = self.BackgroundImg.copy()     # Images can be copied like this
-        all_layers_copy.Shape = self.Shape + tuple()
-        all_layers_copy.CombinedImage = self.CombinedImage.copy()
+        # Copying all other data of Canvas
+        Canvas_copy.BackgroundImg = self.BackgroundImg.copy()     # Images can be copied like this
+        Canvas_copy.Shape = self.Shape + tuple()
+        Canvas_copy.CombinedImage = self.CombinedImage.copy()
         
-        return all_layers_copy
+        return Canvas_copy
 
     def SetLayersVisibility(self, layer_nos):
         # If -1 entered - Show all layers
@@ -219,9 +219,9 @@ def Initialize(args):
             print("\nProvide a correct image path.\n")
             exit()
 
-        # Creating the first layer and all_layers object
+        # Creating the first layer and Canvas object
         FirstLayer = _layer(Img, Name="Layer 0", Position=[0, 0])
-        all_layers = _connectedLayers(layer=FirstLayer)
+        Canvas = _canvas(layer=FirstLayer)
 
     else:
         # If shape is provided, use it, else, take default shape
@@ -230,11 +230,11 @@ def Initialize(args):
         else:
             Shape = [m.DEFAULT_CANVAS_HEIGHT, m.DEFAULT_CANVAS_WIDTH]
 
-        # Creating all_layers object
-        all_layers = _connectedLayers(shape=Shape)
+        # Creating Canvas object
+        Canvas = _canvas(shape=Shape)
 
 
-    return all_layers
+    return Canvas
 
 
 def JoinImages(Images, ImagePositions, ImageShapes):

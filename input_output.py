@@ -5,7 +5,7 @@ import image
 import helping_functions as hf
 
 
-def AddNewLayer(all_layers):
+def AddNewLayer(Canvas):
     print("\nEnter '@' to abort adding of new image.")
         
     while True:
@@ -22,7 +22,7 @@ def AddNewLayer(all_layers):
             continue
 
         # Calling function for adding new layer
-        all_layers.AddLayer(NewImage)
+        Canvas.AddLayer(NewImage)
         print("\nLayer added successfully.")
 
         break
@@ -62,22 +62,22 @@ def AskForLayerNumbers(a, b):
     return nos
 
 
-def ChooseLayersToShow(all_layers, window_title):
+def ChooseLayersToShow(Canvas, window_title):
     # Checking boundary condition
-    if len(all_layers.layers) == 0:             # If no layer is present
+    if len(Canvas.layers) == 0:             # If no layer is present
         print("\nYou should have atleast 1 layer to show/hide layers.\n")
         return
 
     print("\nEnter the layer numbers (comma(',') separated) you wish to see.")
     print("-1 for all layers and -2 for no layer.\n")
-    all_layers.PrintLayerNames()
+    Canvas.PrintLayerNames()
 
-    # Creating a copy of all_layers to work on
-    all_layers_copy = all_layers.Copy()
+    # Creating a copy of Canvas to work on
+    Canvas_copy = Canvas.Copy()
 
     IsAborted = False
     while True:
-        all_layers_copy.Show(Title=window_title)
+        Canvas_copy.Show(Title=window_title)
         key = cv2.waitKey(1)
 
         command = input("\nEnter 'Y/N' to confirm/abort arrangement else enter any other key to select different set of layers: ")
@@ -89,19 +89,19 @@ def ChooseLayersToShow(all_layers, window_title):
             break
         
         # Asking for layer nos and checking if valid umbers passed
-        layer_nos = AskForLayerNumbers(-2, len(all_layers_copy.layers) - 1)
+        layer_nos = AskForLayerNumbers(-2, len(Canvas_copy.layers) - 1)
         if layer_nos is None:           # layer_nos = None if invalid layer nos entered
             continue
 
         # Setting layers' visibility as asked
-        all_layers_copy.SetLayersVisibility(layer_nos)
+        Canvas_copy.SetLayersVisibility(layer_nos)
         
     if IsAborted:
         print("\nChoosing of layers aborted.\n")
 
     else:
         print("\nChoosing of layers successful.\n")
-        all_layers_copy.Copy(copyTo=all_layers)
+        Canvas_copy.Copy(copyTo=Canvas)
 
     cv2.destroyWindow(window_title)
 
@@ -110,12 +110,12 @@ def ChooseLayersToShow(all_layers, window_title):
     return
 
 
-def DeleteLayers(all_layers, window_title):
+def DeleteLayers(Canvas, window_title):
     # Storing initial layers data
-    all_layers_copy = all_layers.Copy()
+    Canvas_copy = Canvas.Copy()
 
     # Checking if at least 1 layer is present so that it can be deleted.
-    if len(all_layers_copy.layers) < 1:
+    if len(Canvas_copy.layers) < 1:
         print("\nNot enough layers to delete. There should be atleast 1 layer.\n")
         return
 
@@ -123,9 +123,9 @@ def DeleteLayers(all_layers, window_title):
 
     IsAborted = False
     while True:
-        all_layers_copy.PrintLayerNames()
+        Canvas_copy.PrintLayerNames()
         # Showing layers
-        all_layers_copy.Show(Title=window_title)
+        Canvas_copy.Show(Title=window_title)
         cv2.waitKey(1)
 
         command = input("\nEnter 'Y'/'N' to confirm/abort deletion else enter any other key to continue: ")
@@ -138,7 +138,7 @@ def DeleteLayers(all_layers, window_title):
             break
 
         # Asking for layer numbers cand checking if valid numbers passed.
-        layer_nos = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        layer_nos = AskForLayerNumbers(0, len(Canvas_copy.layers) - 1)
         if layer_nos is None:                   # layer_nos = None if invalid layer nos entered
             continue
 
@@ -148,25 +148,25 @@ def DeleteLayers(all_layers, window_title):
             continue
 
         # Delete layer corresponding to passed layer numbers.
-        all_layers_copy.DeleteLayers(layer_nos)
+        Canvas_copy.DeleteLayers(layer_nos)
 
     if IsAborted:
         print("\nDeleting of layers aborted.\n")
 
     else:
         print("\nDeleting of layers successful.\n")
-        all_layers_copy.Copy(copyTo=all_layers)
+        Canvas_copy.Copy(copyTo=Canvas)
 
     cv2.destroyWindow(window_title)
 
 
 
-def RearrangeLayers(all_layers, window_title):
+def RearrangeLayers(Canvas, window_title):
     # Copying layer's data.
-    all_layers_copy = all_layers.Copy()
+    Canvas_copy = Canvas.Copy()
 
     # Checking if at least 1 layer is present so that it can be deleted.
-    if len(all_layers_copy.layers) < 2:
+    if len(Canvas_copy.layers) < 2:
         print("\nNot enough layers to rearrange. There should be atleast 2 layer.\n")
         return
 
@@ -174,8 +174,8 @@ def RearrangeLayers(all_layers, window_title):
 
     IsAborted = False
     while True:
-        all_layers_copy.PrintLayerNames()
-        all_layers_copy.Show(Title=window_title)
+        Canvas_copy.PrintLayerNames()
+        Canvas_copy.Show(Title=window_title)
         cv2.waitKey(1)
 
         command = input("\nEnter 'Y'/'N' to confirm/abort rearrangement else enter any other key to continue: ")
@@ -188,7 +188,7 @@ def RearrangeLayers(all_layers, window_title):
             break
 
         # Asking for layer numbers cand checking if valid numbers passed.
-        layer_nos = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        layer_nos = AskForLayerNumbers(0, len(Canvas_copy.layers) - 1)
         if layer_nos is None:                   # layer_nos = None if invalid layer nos entered
             continue
 
@@ -199,24 +199,24 @@ def RearrangeLayers(all_layers, window_title):
             continue
 
         # Exchange layers.
-        all_layers_copy.ExchangeLayers(layer_nos[0], layer_nos[1])
+        Canvas_copy.ExchangeLayers(layer_nos[0], layer_nos[1])
 
     if IsAborted:
         print("\nRearranging of layers aborted.\n")
 
     else:
         print("\nRearranging of layers successful.\n")
-        all_layers_copy.Copy(copyTo=all_layers)
+        Canvas_copy.Copy(copyTo=Canvas)
 
     cv2.destroyWindow(window_title)
 
 
-def MergeLayers(all_layers, window_title):
+def MergeLayers(Canvas, window_title):
     # Copying layer's data.
-    all_layers_copy = all_layers.Copy()
+    Canvas_copy = Canvas.Copy()
 
     # Checking if at least 2 layers present.
-    if len(all_layers_copy.layers) < 2:
+    if len(Canvas_copy.layers) < 2:
         print("\nNot enough layers to merge. There should be atleast 2 layer.\n")
         return
 
@@ -224,8 +224,8 @@ def MergeLayers(all_layers, window_title):
 
     IsAborted = False
     while True:
-        all_layers_copy.PrintLayerNames()
-        all_layers_copy.Show(Title=window_title)
+        Canvas_copy.PrintLayerNames()
+        Canvas_copy.Show(Title=window_title)
         cv2.waitKey(1)
 
         layer_nos = input("\nEnter 'Y'/'N' to confirm/abort rearrangement else enter any other key to continue: ")
@@ -238,7 +238,7 @@ def MergeLayers(all_layers, window_title):
             break
 
         # Asking for layer numbers and checking if valid numbers passed.
-        layer_nos = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        layer_nos = AskForLayerNumbers(0, len(Canvas_copy.layers) - 1)
         if layer_nos is None:                       # layer_nos = None if invalid layer nos entered
             continue
 
@@ -249,24 +249,24 @@ def MergeLayers(all_layers, window_title):
             continue
 
         # Merge layers.
-        all_layers_copy.MergeLayers(layer_nos)
+        Canvas_copy.MergeLayers(layer_nos)
 
     if IsAborted:
         print("\nMerging of layers aborted.\n")
 
     else:
         print("\nMerging of layers successful.\n")
-        all_layers_copy.Copy(copyTo=all_layers)
+        Canvas_copy.Copy(copyTo=Canvas)
 
     cv2.destroyWindow(window_title)
 
 
-def RenameLayers(all_layers):
+def RenameLayers(Canvas):
     # Copying layer's data.
-    all_layers_copy = all_layers.Copy()
+    Canvas_copy = Canvas.Copy()
 
     # Checking if at least 1 layer is present so that it can be renamed.
-    if len(all_layers_copy.layers) < 1:
+    if len(Canvas_copy.layers) < 1:
         print("\nNot enough layers to rename. There should be atleast 1 layer.\n")
         return
     
@@ -274,7 +274,7 @@ def RenameLayers(all_layers):
 
     IsAborted = False
     while True:
-        all_layers_copy.PrintLayerNames()
+        Canvas_copy.PrintLayerNames()
 
         command = input("\nEnter 'Y'/'N' to confirm/abort renaming else enter any other key to continue: ")
 
@@ -286,7 +286,7 @@ def RenameLayers(all_layers):
             break
 
         # Ask for layer number to rename, if invalid layer number passed, ask again
-        layer_no = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        layer_no = AskForLayerNumbers(0, len(Canvas_copy.layers) - 1)
         if layer_no is None:                    # layer_nos = None if invalid layer nos entered
             continue
 
@@ -298,23 +298,23 @@ def RenameLayers(all_layers):
         # Asking for new name
         rename_to = input("Enter the new name: ")
         # Renaming layer
-        all_layers_copy.RenameLayer(layer_no[0], rename_to)
+        Canvas_copy.RenameLayer(layer_no[0], rename_to)
 
     if IsAborted:
         print("\nRenaming of layers aborted.\n")
 
     else:
         print("\nRenaming of layers successful.\n")
-        all_layers_copy.Copy(copyTo=all_layers)
+        Canvas_copy.Copy(copyTo=Canvas)
 
 
 
-def DuplicateLayers(all_layers):
+def DuplicateLayers(Canvas):
     # Copying layer's data.
-    all_layers_copy = all_layers.Copy()
+    Canvas_copy = Canvas.Copy()
 
     # Checking if at least 1 layer is present so that it can be renamed.
-    if len(all_layers_copy.layers) < 1:
+    if len(Canvas_copy.layers) < 1:
         print("\nNot enough layers to duplicate. There should be atleast 1 layer.\n")
         return
     
@@ -322,7 +322,7 @@ def DuplicateLayers(all_layers):
 
     IsAborted = False
     while True:
-        all_layers_copy.PrintLayerNames()
+        Canvas_copy.PrintLayerNames()
 
         command = input("\nEnter 'Y'/'N' to confirm/abort duplicating else enter any other key to continue: ")
 
@@ -334,7 +334,7 @@ def DuplicateLayers(all_layers):
             break
 
         # Ask for layer number to rename, if invalid layer number passed, ask again
-        layer_no = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        layer_no = AskForLayerNumbers(0, len(Canvas_copy.layers) - 1)
         if layer_no is None:                    # layer_nos = None if invalid layer nos entered
             continue
 
@@ -344,17 +344,17 @@ def DuplicateLayers(all_layers):
             continue
 
         # Duplicating layer
-        all_layers_copy.DuplicateLayer(layer_no[0])
+        Canvas_copy.DuplicateLayer(layer_no[0])
 
     if IsAborted:
         print("\nDuplicating of layers aborted.\n")
 
     else:
         print("\nDuplicating of layers successful.\n")
-        all_layers_copy.Copy(copyTo=all_layers)
+        Canvas_copy.Copy(copyTo=Canvas)
 
 
-def LayerOperations(all_layers, window_title):
+def LayerOperations(Canvas, window_title):
     while True:
         print()
         print("Enter 'R' to rearrange layers.")
@@ -371,23 +371,23 @@ def LayerOperations(all_layers, window_title):
             continue
 
         elif 'r' in command or 'R' in command:      # 'r'/'R' entered -> Rearrange layers
-            RearrangeLayers(all_layers, window_title)
+            RearrangeLayers(Canvas, window_title)
             break
 
         elif 'd' in command or 'D' in command:      # 'd'/'D' entered -> Delete layers
-            DeleteLayers(all_layers, window_title)
+            DeleteLayers(Canvas, window_title)
             break
 
         elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Merge layers
-            MergeLayers(all_layers, window_title)
+            MergeLayers(Canvas, window_title)
             break
         
         elif 'e' in command or 'E' in command:      # 'e'/'E' entered -> Rename layers
-            RenameLayers(all_layers)
+            RenameLayers(Canvas)
             break
 
         elif 'c' in command or 'C' in command:      # 'c'/'C' entered -> Duplicate layer
-            DuplicateLayers(all_layers)
+            DuplicateLayers(Canvas)
             break
 
         else:                                       # If invalid command is passed.
