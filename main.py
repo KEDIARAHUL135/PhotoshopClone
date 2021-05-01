@@ -36,6 +36,23 @@ def PrintActionStatements():
 
 
 
+def TakeOperation_Num(MaxNum):
+    # Taking input
+    Operation_Num = input("\nEnter the operation number: ")
+
+    try:        # If valid number passed
+        Operation_Num = Operation_Num.replace(" ", "")
+        Operation_Num = int(Operation_Num)
+        if 0 <= Operation_Num < MaxNum:
+            return Operation_Num
+        else:
+            raise ValueError
+    except:     # If invalid number passed
+        print("\nInvalid operation number entered.")
+        hf.Sleep()
+        return None
+
+
 if __name__ == "__main__":
     ArgParse()          # Parsing command line arguments
 
@@ -54,8 +71,14 @@ if __name__ == "__main__":
 
         # Showing all layers
         Canvas.Show()
-        key_pressed = cv2.waitKey(0)
-        action_str = action[key_pressed]
+        cv2.waitKey(1)
+
+        # Taking operation number
+        Operation_Num = TakeOperation_Num(len(action))
+        if Operation_Num is None:                   # Invalid operation number entered
+            continue
+        # Getting action string
+        action_str = action[Operation_Num]
         
         if action_str is None:                      # Continue if valid key is not pressed
             continue
@@ -66,10 +89,10 @@ if __name__ == "__main__":
         elif action_str == "SHOW_SELECTED_LAYERS":  # Show selected layers
             input_output.ChooseLayersToShow(Canvas, "Layers selection")
 
-        elif action_str == "LAYER_OPERATIONS":       # Rearrange/ merge or delete layers
+        elif action_str == "LAYER_OPERATIONS":      # Rearrange/ Delete/ Merge/ Rename/ Duplicate layers
             input_output.LayerOperations(Canvas, "Layer operations")
 
-        elif action_str == "BREAK":                 # Breaking
+        elif action_str == "EXIT":                  # Exit code
             break
 
 

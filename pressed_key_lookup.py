@@ -1,15 +1,15 @@
 # 128 ASCII values available
-action = [None] * 128
+action = []
 action_statements = []
 
-action[32] = "BREAK"                                            # Spacebar
-action_statements.append("Press Spacebar to BRAEK the process.")
+action.append("EXIT")
+action_statements.append("0  : EXIT code")
 
-action[65] = action[97] = "ADD_LAYER"                           # 'a' , 'A'
-action_statements.append("Press 'A' to ADD NEW LAYER.")
+action.append("ADD_LAYER")
+action_statements.append("1  : Add new Layer")
 
-action[76] = action[108] = "SHOW_SELECTED_LAYERS"               # 'l' , 'L'
-action_statements.append("Press 'L' to SHOW SPECIFIC LAYERS.")
+action.append("SHOW_SELECTED_LAYERS")
+action_statements.append("2  : Show specific layers")
 
-action[12] = "LAYER_OPERATIONS"                                 # Ctrl + L
-action_statements.append("Press 'Ctrl + L' to see all the layer operations available(Rearrange, Delete, Merge, Rename Layers).")
+action.append("LAYER_OPERATIONS")
+action_statements.append("3  : Perform layer operations (Rearrange, Delete, Merge, Rename, Duplicate Layers)")
