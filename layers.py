@@ -198,6 +198,16 @@ class _connectedLayers:
         self.layers[layer_no].Name = rename_to
 
 
+    def DuplicateLayer(self, layer_no):
+        # Copying the layer. and changing its name to "<old_name> copy"
+        LayerCopy = self.layers[layer_no].Copy()
+        LayerCopy.Name += " copy"
+
+        # Storing this layer on the top of "layer_no"
+        self.layers.insert(layer_no+1, LayerCopy)
+
+
+
 
 # Initializes the project layers
 def Initialize(args):

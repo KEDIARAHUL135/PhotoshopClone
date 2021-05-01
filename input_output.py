@@ -308,6 +308,52 @@ def RenameLayers(all_layers):
         all_layers_copy.Copy(copyTo=all_layers)
 
 
+
+def DuplicateLayers(all_layers):
+    # Copying layer's data.
+    all_layers_copy = all_layers.Copy()
+
+    # Checking if at least 1 layer is present so that it can be renamed.
+    if len(all_layers_copy.layers) < 1:
+        print("\nNot enough layers to duplicate. There should be atleast 1 layer.\n")
+        return
+    
+    print("\nEnter the layer number you wish to duplicate.")
+
+    IsAborted = False
+    while True:
+        all_layers_copy.PrintLayerNames()
+
+        command = input("\nEnter 'Y'/'N' to confirm/abort duplicating else enter any other key to continue: ")
+
+        if 'y' in command or 'Y' in command:    # If 'y'/'Y' entered -> confirm rename
+            break
+
+        elif 'n' in command or 'N' in command:  # if 'n'/'N' entered -> Abort rename
+            IsAborted = True
+            break
+
+        # Ask for layer number to rename, if invalid layer number passed, ask again
+        layer_no = AskForLayerNumbers(0, len(all_layers_copy.layers) - 1)
+        if layer_no is None:                    # layer_nos = None if invalid layer nos entered
+            continue
+
+        # If more or less than 1 layer number entered, ask again.
+        if len(layer_no) != 1:
+            print("Invalid number of layer number entered. Enter exactly 1 number.")
+            continue
+
+        # Duplicating layer
+        all_layers_copy.DuplicateLayer(layer_no[0])
+
+    if IsAborted:
+        print("\nDuplicating of layers aborted.\n")
+
+    else:
+        print("\nDuplicating of layers successful.\n")
+        all_layers_copy.Copy(copyTo=all_layers)
+
+
 def LayerOperations(all_layers, window_title):
     while True:
         print()
@@ -315,6 +361,7 @@ def LayerOperations(all_layers, window_title):
         print("Enter 'D' to delete layers.")
         print("Enter 'M' to merge layers.")
         print("Enter 'E' to rename layers.")
+        print("Enter 'C' to duplicate layers.")
 
         command = input("\nEnter command: ")
         command = command.replace(" ", "")
@@ -337,6 +384,10 @@ def LayerOperations(all_layers, window_title):
         
         elif 'e' in command or 'E' in command:      # 'e'/'E' entered -> Rename layers
             RenameLayers(all_layers)
+            break
+
+        elif 'c' in command or 'C' in command:      # 'c'/'C' entered -> Duplicate layer
+            DuplicateLayers(all_layers)
             break
 
         else:                                       # If invalid command is passed.
