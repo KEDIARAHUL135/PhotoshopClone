@@ -220,7 +220,7 @@ def MergeLayers(all_layers, window_title):
         print("\nNot enough layers to merge. There should be atleast 2 layer.\n")
         return
 
-    print("\nEnter 2 comma(',') separated numbers of the layer you want to merge.")
+    print("\nEnter comma(',') separated numbers of the layers you want to merge.")
 
     IsAborted = False
     while True:
