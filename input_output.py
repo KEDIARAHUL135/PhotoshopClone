@@ -308,7 +308,7 @@ def RenameLayers(all_layers):
         all_layers_copy.Copy(copyTo=all_layers)
 
 
-def LayerProcesses(all_layers, window_title):
+def LayerOperations(all_layers, window_title):
     while True:
         print()
         print("Enter 'R' to rearrange layers.")
