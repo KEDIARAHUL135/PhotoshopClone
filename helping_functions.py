@@ -78,3 +78,6 @@ def to_xywh(x1, y1, x2, y2):
 
     return w, h
 
+
+def EmptyCallBackFunc(event, x, y, flags, Canvas):
+    pass

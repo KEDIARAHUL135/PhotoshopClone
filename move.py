@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+import helping_functions as hf
+
 
 def CallBackFunc_MoveTool(event, x, y, flags, Canvas):
     # Taking global params
@@ -43,8 +45,13 @@ def CallBackFunc_MoveTool(event, x, y, flags, Canvas):
 def MoveTool(Canvas, window_title):
     print("\nPress 'Y' to confirm and exit move tool else keep editing.\n")
 
-    # Setting mouse callback
+    # Clearing mouse buffer data (old mouse data) - this is a bug in OpenCV probably
     cv2.namedWindow(window_title)
+    cv2.setMouseCallback(window_title, hf.EmptyCallBackFunc)
+    Canvas.Show(Title=window_title)
+    cv2.waitKey(1)
+
+    # Setting mouse callback
     cv2.setMouseCallback(window_title, CallBackFunc_MoveTool, Canvas)
 
     # Setting some params used in callback function
