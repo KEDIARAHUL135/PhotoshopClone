@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import argparse
 
+import move
 import layers
 import macros as m
 import input_output
@@ -91,6 +92,9 @@ if __name__ == "__main__":
 
         elif action_str == "LAYER_OPERATIONS":      # Rearrange/ Delete/ Merge/ Rename/ Duplicate layers
             input_output.LayerOperations(Canvas, "Layer operations")
+
+        elif action_str == "MOVE_TOOL":             # Move tool
+            move.MoveTool(Canvas, "Move Tool")
 
         elif action_str == "EXIT":                  # Exit code
             break
