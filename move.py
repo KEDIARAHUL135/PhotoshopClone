@@ -69,5 +69,3 @@ def MoveTool(Canvas, window_title):
 
         if Key == 89 or Key == 121:     # If 'Y'/'y' pressed
             break
-
-    cv2.destroyWindow(window_title)

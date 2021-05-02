@@ -94,7 +94,7 @@ if __name__ == "__main__":
             input_output.LayerOperations(Canvas, "Layer operations")
 
         elif action_str == "MOVE_TOOL":             # Move tool
-            move.MoveTool(Canvas, "Move Tool")
+            move.MoveTool(Canvas, window_title)
 
         elif action_str == "EXIT":                  # Exit code
             break
