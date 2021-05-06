@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 import image
+import marquee
 import helping_functions as hf
 
 
@@ -84,7 +85,7 @@ def ChooseLayersToShow(Canvas, window_title):
         
         if 'Y' in command or 'y' in command:        # 'Y' or 'y' is pressed. - confirm
             break
-        elif 'N' in command or 'n' in command:      # 'Y' or 'y' is pressed. - confirm
+        elif 'N' in command or 'n' in command:      # 'N' or 'n' is pressed. - abort
             IsAborted = True
             break
         
@@ -417,7 +418,7 @@ def MarqueeTool(Canvas, window_title):
             continue
 
         elif 'r' in command or 'R' in command:      # 'r'/'R' entered -> Rectangular Marquee Tool
-            # Call respective function here
+            marquee.RectangularMarqueeTool(Canvas, window_title)
             break
 
         elif 'e' in command or 'E' in command:      # 'e'/'E' entered -> Elliptical Marquee Tool

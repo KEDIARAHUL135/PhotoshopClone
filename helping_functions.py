@@ -81,3 +81,21 @@ def to_xywh(x1, y1, x2, y2):
 
 def EmptyCallBackFunc(event, x, y, flags, Canvas):
     pass
+
+
+def Correct_xy_While_Selecting(x, y, x_range, y_range):
+    if x < x_range[0]:
+        x = x_range[0]
+    elif x > x_range[1]:
+        x = x_range[1]
+    
+    if y < y_range[0]:
+        y = y_range[0]
+    elif y > y_range[1]:
+        y = y_range[1]
+
+    return x, y
+
+
+def CorrectRectPoints(x1, y1, x2, y2):
+    return min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)
