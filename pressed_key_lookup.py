@@ -16,3 +16,6 @@ action_statements.append("3  : Perform layer operations (Rearrange, Delete, Merg
 
 action.append("MOVE_TOOL")
 action_statements.append("4  : Move Tool")
+
+action.append("MARQUEE_TOOL")
+action_statements.append("5  : Marquee Tool")

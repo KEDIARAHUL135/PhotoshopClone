@@ -398,3 +398,47 @@ def LayerOperations(Canvas, window_title):
     hf.Sleep()
 
     return
+
+
+
+def MarqueeTool(Canvas, window_title):
+    while True:
+        print()
+        print("Enter 'R' for Rectangular Marquee Tool.")
+        print("Enter 'E' for Elliptical Marquee Tool.")
+        print("Enter 'W' for Single Row Marquee Tool.")
+        print("Enter 'C' for Single Column Marquee Tool.")
+
+        command = input("\nEnter command: ")
+        command = command.replace(" ", "")
+
+        if len(command) > 1:                        # If more than 1 command entered.
+            print("Too many commands entered. Enter only one command.\n")
+            continue
+
+        elif 'r' in command or 'R' in command:      # 'r'/'R' entered -> Rectangular Marquee Tool
+            # Call respective function here
+            break
+
+        elif 'e' in command or 'E' in command:      # 'e'/'E' entered -> Elliptical Marquee Tool
+            # Call respective function here
+            break
+
+        elif 'w' in command or 'W' in command:      # 'w'/'W' entered -> Single Row Marquee Tool
+            # Call respective function here
+            break
+        
+        elif 'c' in command or 'C' in command:      # 'c'/'C' entered -> Single Column Marquee Tool
+            # Call respective function here
+            break
+
+        else:                                       # If invalid command is passed.
+            print("Invalid command passed. Enter command again.\n")
+            continue
+        
+    cv2.destroyWindow(window_title)
+    hf.Sleep()
+
+    return
+
+    

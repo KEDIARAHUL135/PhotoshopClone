@@ -96,6 +96,9 @@ if __name__ == "__main__":
         elif action_str == "MOVE_TOOL":             # Move tool
             move.MoveTool(Canvas, window_title)
 
+        elif action_str == "MARQUEE_TOOL":          # Marquee tool
+            input_output.MarqueeTool(Canvas, window_title)
+
         elif action_str == "EXIT":                  # Exit code
             break
 
