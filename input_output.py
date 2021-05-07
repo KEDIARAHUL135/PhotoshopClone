@@ -430,7 +430,7 @@ def MarqueeTool(Canvas, window_title):
             break
         
         elif 'c' in command or 'C' in command:      # 'c'/'C' entered -> Single Column Marquee Tool
-            # Call respective function here
+            marquee.SingleColMarqueeTool(Canvas, window_title)
             break
 
         else:                                       # If invalid command is passed.
