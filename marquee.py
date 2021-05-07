@@ -18,6 +18,45 @@ def AskLayerNumsToCopy(a, b):
             return layer_nos
 
 
+def ExtractSelectedRegion(Canvas, Selected_BB, Selected_Mask, layer_nos):
+    # Bounding box of the region
+    [x, y, w, h] = Selected_BB
+
+    # Sorting the layer numbers in increasing order
+    layer_nos = sorted(layer_nos)
+
+    # Selected region combined image
+    Selected_Image = np.zeros((h, w, 4), dtype=np.uint8)
+
+    for layer_no in layer_nos:
+        # Intersecting rectangle
+        # IntRect is the coordinates of intersecting rectange wrt the canvas
+        IntRect = hf.Intersection(Selected_BB, Canvas.layers[layer_no].Position + list(Canvas.layers[layer_no].Shape)[::-1])
+        if IntRect is None:         # If no intersecting part
+            continue
+        # Converting IntRect to wrt image and wrt selected region
+        IntRect_Image = [IntRect[0] - Canvas.layers[layer_no].Position[0],
+                         IntRect[1] - Canvas.layers[layer_no].Position[1],
+                         IntRect[2], IntRect[3]]
+        IntRect_Region = [IntRect[0] - Selected_BB[0], IntRect[1] - Selected_BB[1],
+                          IntRect[2], IntRect[3]]
+        _x, _y, _w, _h = IntRect_Region
+
+        # Cropping out layer's image
+        LayerImg = Canvas.layers[layer_no].Image[IntRect_Image[1] : IntRect_Image[1]+IntRect_Image[3], 
+                                                 IntRect_Image[0] : IntRect_Image[0]+IntRect_Image[2]].copy()
+
+        # Adding these layer images to the selected image
+        alpha = LayerImg[:, :, [-1]].astype(float)/255
+        alpha = cv2.merge((alpha, alpha, alpha))
+        Selected_Image[_y:_y+_h, _x:_x+_w, :-1] = cv2.add(cv2.multiply(alpha, LayerImg[:, :, :-1], dtype=cv2.CV_64F),
+                                                          cv2.multiply(1.0 - alpha, Selected_Image[_y:_y+_h, _x:_x+_w, :-1], dtype=cv2.CV_64F))
+        Selected_Image[_y:_y+_h, _x:_x+_w, -1] = cv2.max(LayerImg[:, :, [-1]], Selected_Image[_y:_y+_h, _x:_x+_w, [-1]])
+
+
+    # Add the new layer of the selected region
+    Canvas.AddLayer(Selected_Image, Index=(layer_nos[-1]+1))
+
 
 
 def CallBackFunc_RectMarqueeTool(event, x, y, flags, params):
@@ -56,7 +95,7 @@ def CallBackFunc_RectMarqueeTool(event, x, y, flags, params):
 def RectangularMarqueeTool(Canvas, window_title):
     # Taking layer numbers user wants to copy
     Canvas.PrintLayerNames()
-    layer_nos = AskLayerNumsToCopy(-1, len(Canvas.layers) - 1)
+    layer_nos_to_copy = AskLayerNumsToCopy(-1, len(Canvas.layers) - 1)
 
     print("\nPress 'Y' to confirm selection and copy it in a new layer else press 'N' to abort.")
     print("You can also used the keys 'W', 'A', 'S', and 'D', to move the")
@@ -125,6 +164,9 @@ def RectangularMarqueeTool(Canvas, window_title):
 
         # Correcting rectangular's points
         X1_, Y1_, X2_, Y2_ = hf.CorrectRectPoints(X1_, Y1_, X2_, Y2_)
+        Selected_BB = [X1_, Y1_, (X2_-X1_+1), (Y2_-Y1_+1)]
+        Selected_Mask = np.ones((Selected_BB[3], Selected_BB[2], 3), dtype=np.uint8)
+        ExtractSelectedRegion(Canvas, Selected_BB, Selected_Mask, layer_nos_to_copy)
     
     else:
         print("\nRegion selection aborted.")

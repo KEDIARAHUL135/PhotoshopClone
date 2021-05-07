@@ -59,9 +59,15 @@ class _canvas:
         self.Shape = self.BackgroundImg.shape[:2]
     
 
-    def AddLayer(self, Image):
+    def AddLayer(self, Image, Index=None):
         NewLayer = _layer(Image, Name="Layer " + str(len(self.layers)))
-        self.layers.append(NewLayer)
+        
+        # Adding new layer at the mentioned index
+        if Index is None:
+            self.layers.append(NewLayer)
+        else:
+            self.layers.insert(Index, NewLayer)
+        
 
 
     def CombineLayers(self):

@@ -99,3 +99,22 @@ def Correct_xy_While_Selecting(x, y, x_range, y_range):
 
 def CorrectRectPoints(x1, y1, x2, y2):
     return min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)
+
+
+def Intersection(Rect1, Rect2):
+    x = max(Rect1[0], Rect2[0])
+    y = max(Rect1[1], Rect2[1])
+    w = min(Rect1[0] + Rect1[2], Rect2[0] + Rect2[2]) - x
+    h = min(Rect1[1] + Rect1[3], Rect2[1] + Rect2[3]) - y
+    
+    if w < 0 or h < 0: 
+        return None
+    return [x, y, w, h]
+
+
+def Union(Rect1, Rect2):
+  x = min(Rect1[0], Rect2[0])
+  y = min(Rect1[1], Rect2[1])
+  w = max(Rect1[0] + Rect1[2], Rect2[0] + Rect2[2]) - x
+  h = max(Rect1[1] + Rect1[3], Rect2[1] + Rect2[3]) - y
+  return (x, y, w, h)
