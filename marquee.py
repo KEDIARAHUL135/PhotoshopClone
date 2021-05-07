@@ -206,3 +206,110 @@ def RectangularMarqueeTool(Canvas, window_title):
 
 
 ###############################################################################################################################################################
+
+
+######################################################## Elliptical Marquee Tool ##############################################################################
+
+def CallBackFunc_ElliMarqueeTool(event, x, y, flags, params):
+    # Taking global params
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, ix, iy, X_, Y_, A_, B_
+
+    # Starts selecting - Left button is pressed down
+    if event == cv2.EVENT_LBUTTONDOWN:
+        selecting = True
+        isSelected = False
+        ix, iy = x, y
+
+    # Selecting the region
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if selecting:
+            FrameToShow = CombinedFrame.copy()
+            X_, Y_ = (ix + x)//2, (iy + y)//2
+            A_, B_ = abs(ix - x)//2, abs(iy - y)//2
+            cv2.ellipse(FrameToShow, (X_, Y_), (A_, B_), 0, 0, 360, (127, 127, 127), 1)
+
+    # Stop selecting the layer.
+    elif event == cv2.EVENT_LBUTTONUP:
+        FrameToShow = CombinedFrame.copy()
+        selecting = False
+        X_, Y_ = (ix + x)//2, (iy + y)//2
+        A_, B_ = abs(ix - x)//2, abs(iy - y)//2
+        cv2.ellipse(FrameToShow, (X_, Y_), (A_, B_), 0, 0, 360, (127, 127, 127), 1)
+        if not (ix == x and iy == y):
+            isSelected = True
+
+
+
+def EllipticalMarqueeTool(Canvas, window_title):
+    hf.Clear()
+    # Taking layer numbers user wants to copy
+    Canvas.PrintLayerNames()
+    layer_nos_to_copy = AskLayerNumsToCopy(-1, len(Canvas.layers) - 1)
+
+    print("\nPress 'Y' to confirm selection and copy it in a new layer else press 'N' to abort.")
+    print("You can also used the keys 'W', 'A', 'S', and 'D', to move the")
+    print("selected region Up, Left, Down, and Right respectively.")
+
+    # Clearing mouse buffer data (old mouse data) - this is a bug in OpenCV probably
+    cv2.namedWindow(window_title)
+    cv2.setMouseCallback(window_title, hf.EmptyCallBackFunc)
+    Canvas.Show(Title=window_title)
+    cv2.waitKey(1)
+
+    # Setting mouse callback
+    cv2.setMouseCallback(window_title, CallBackFunc_ElliMarqueeTool)
+
+    # Setting some params used in callback function
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, ix, iy, X_, Y_, A_, B_
+    selecting = False       # True if region is being selected      
+    isSelected = False      # True if region is selected
+    Canvas.CombineLayers()
+    CombinedFrame = Canvas.CombinedImage.copy()     # the combined frame of the canvas
+    FrameToShow = CombinedFrame.copy()              # The frame which will be shown (with the selected region)
+    CanvasShape = Canvas.Shape                      # Shape of the canvas
+    ix, iy = 0, 0                                   # Position of mouse from where ellipse is started selecting
+    X_, Y_, A_, B_ = 0, 0, 360, 0                     # Selected ellipse's center coordinates and lengths of major and minor axes
+
+    IsAborted = False
+    while True:
+        # Showing canvas
+        cv2.imshow(window_title, FrameToShow)
+        Key = cv2.waitKey(1)
+
+        if Key == 89 or Key == 121:         # If 'Y'/'y' - confirm
+            if isSelected:                  # If the region is selected
+                break
+            else:                           # If the region is not selected yet
+                print("Select a region first to confirm.")
+                continue
+        elif Key == 78 or Key == 110:       # If 'N'/'n' - abort
+            IsAborted = True
+            break
+        
+        # If the region is selected, check if the user is trying to move it
+        if isSelected:
+            if Key == 87 or Key == 119:     # If 'W'/'w' - move up
+                Y_ -= 1
+            if Key == 65 or Key == 97:      # If 'A'/'a' - move left
+                X_ -= 1
+            if Key == 83 or Key == 115:     # If 'S'/'s' - move down
+                Y_ += 1
+            if Key == 68 or Key == 100:     # If 'D'/'d' - move right
+                X_ += 1
+            
+            FrameToShow = CombinedFrame.copy()
+            cv2.ellipse(FrameToShow, (X_, Y_), (A_, B_), 0, 0, 360, (127, 127, 127), 1)
+            
+
+    if not IsAborted:
+        # Correcting rectangular's points
+        Selected_BB = [X_ - A_, Y_ - B_, 2*A_, 2*B_]
+        Selected_Mask = np.zeros((Selected_BB[3], Selected_BB[2], 1), dtype=np.uint8)
+        cv2.ellipse(Selected_Mask, (A_, B_), (A_, B_), 0, 0, 360, 255, -1)
+        ExtractSelectedRegion(Canvas, Selected_BB, Selected_Mask, layer_nos_to_copy)
+    
+    else:
+        print("\nRegion selection aborted.")
+
+
+###############################################################################################################################################################

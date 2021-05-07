@@ -422,7 +422,7 @@ def MarqueeTool(Canvas, window_title):
             break
 
         elif 'e' in command or 'E' in command:      # 'e'/'E' entered -> Elliptical Marquee Tool
-            # Call respective function here
+            marquee.EllipticalMarqueeTool(Canvas, window_title)
             break
 
         elif 'w' in command or 'W' in command:      # 'w'/'W' entered -> Single Row Marquee Tool
