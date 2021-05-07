@@ -15,14 +15,15 @@ def CallBackFunc_MoveTool(event, x, y, flags, Canvas):
         # Finding the moving layer's index
         movingLayer = -1                # Dummy value
         for i in range(len(Canvas.layers) - 1, -1, -1):     # Moving from top to bottom layer
-            # Layer x, y, and height and width
-            lx, ly = Canvas.layers[i].Position
-            lh, lw = Canvas.layers[i].Shape
+            if Canvas.layers[i].IsVisible:
+                # Layer x, y, and height and width
+                lx, ly = Canvas.layers[i].Position
+                lh, lw = Canvas.layers[i].Shape
 
-            if lx <= x < lx + lw and ly <= y < ly + lh:
-                movingLayer = i
-                ii_x, ii_y = lx, ly
-                break
+                if lx <= x < lx + lw and ly <= y < ly + lh:
+                    movingLayer = i
+                    ii_x, ii_y = lx, ly
+                    break
 
         # Checking if any layer is selected and changing "moving" flag accrodingly.
         if movingLayer == -1:           # Background layer
