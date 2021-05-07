@@ -426,7 +426,7 @@ def MarqueeTool(Canvas, window_title):
             break
 
         elif 'w' in command or 'W' in command:      # 'w'/'W' entered -> Single Row Marquee Tool
-            # Call respective function here
+            marquee.SingleRowMarqueeTool(Canvas, window_title)
             break
         
         elif 'c' in command or 'C' in command:      # 'c'/'C' entered -> Single Column Marquee Tool
