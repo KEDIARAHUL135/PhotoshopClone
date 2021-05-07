@@ -437,7 +437,6 @@ def MarqueeTool(Canvas, window_title):
             print("Invalid command passed. Enter command again.\n")
             continue
         
-    cv2.destroyWindow(window_title)
     hf.Sleep()
 
     return

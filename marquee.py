@@ -8,7 +8,7 @@ import helping_functions as hf
 
 def AskLayerNumsToCopy(a, b):
     while True:
-        print("\nEnter the layer numbers you want to copy with this tool.")
+        print("\nEnter the layer numbers you want to copy with this tool (-1 for all layers).")
         layer_nos = input_output.AskForLayerNumbers(a, b)
 
         if layer_nos is None:
@@ -23,6 +23,8 @@ def ExtractSelectedRegion(Canvas, Selected_BB, Selected_Mask, layer_nos):
     [x, y, w, h] = Selected_BB
 
     # Sorting the layer numbers in increasing order
+    if layer_nos.count(-1) != 0:
+        layer_nos = [i for i in range(len(Canvas.layers))]
     layer_nos = sorted(layer_nos)
 
     # Selected region combined image
