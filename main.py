@@ -99,6 +99,9 @@ if __name__ == "__main__":
         elif action_str == "MARQUEE_TOOL":          # Marquee tool
             input_output.MarqueeTool(Canvas, window_title)
 
+        elif action_str == "LASSO_TOOL":            # Lasso Tool
+            input_output.LassoTool(Canvas, window_title)
+
         elif action_str == "EXIT":                  # Exit code
             break
 

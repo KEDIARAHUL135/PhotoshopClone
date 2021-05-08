@@ -1,4 +1,5 @@
 import os
+import cv2
 import time
 import numpy as np
 
@@ -118,3 +119,31 @@ def Union(Rect1, Rect2):
   w = max(Rect1[0] + Rect1[2], Rect2[0] + Rect2[2]) - x
   h = max(Rect1[1] + Rect1[3], Rect2[1] + Rect2[3]) - y
   return (x, y, w, h)
+
+
+def ShiftContour(Contour, ToOrigin=True, ShiftBy=[0, 0], Get_Mask_BB=False):
+    # Getting the bounding rectangle of the contour.
+    (x, y, w, h) = cv2.boundingRect(np.array(Contour))
+
+    # If shift contour to origin, we will have to shift it by the 
+    # value equal to its bounding box's top left coorner coordinate
+    if ToOrigin:
+        ShiftBy = [x, y]
+
+    # Shifting the contour
+    ShiftedContour = []
+    for i in range(len(Contour)):
+        ShiftedContour.append([[(Contour[i][0][0] - ShiftBy[0]), (Contour[i][0][1] - ShiftBy[1])]])
+
+
+    # If bounding box and mask image are asked
+    if Get_Mask_BB:
+        # Creating the mask image
+        MaskImage = np.zeros((h, w, 1), dtype=np.uint8)
+        cv2.drawContours(MaskImage, [np.array(ShiftedContour)], -1, 255, -1)
+
+        return ShiftedContour, MaskImage, (x, y, w, h)
+
+    # If only shifted contour required
+    else:
+        return ShiftedContour

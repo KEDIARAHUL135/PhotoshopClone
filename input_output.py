@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+import lasso
 import image
 import marquee
 import helping_functions as hf
@@ -441,4 +442,37 @@ def MarqueeTool(Canvas, window_title):
 
     return
 
-    
+
+def LassoTool(Canvas, window_title):
+    while True:
+        print()
+        print("Enter 'L' for Lasso Tool.")
+        print("Enter 'P' for Polygon Lasso Tool.")
+        print("Enter 'M' for Magnetic Lasso Tool.")
+
+        command = input("\nEnter command: ")
+        command = command.replace(" ", "")
+
+        if len(command) > 1:                        # If more than 1 command entered.
+            print("Too many commands entered. Enter only one command.\n")
+            continue
+
+        elif 'l' in command or 'L' in command:      # 'l'/'L' entered -> Lasso Tool
+            lasso.LassoTool(Canvas, window_title)
+            break
+
+        # elif 'p' in command or 'P' in command:      # 'p'/'P' entered -> Polygon Lasso Tool
+        #     lasso.PolygonLassoTool(Canvas, window_title)
+        #     break
+
+        # elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magnetic Lasso Tool
+        #     lasso.MagneticLassoTool(Canvas, window_title)
+        #     break
+        
+        else:                                       # If invalid command is passed.
+            print("Invalid command passed. Enter command again.\n")
+            continue
+        
+    hf.Sleep()
+
+    return

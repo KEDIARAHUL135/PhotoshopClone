@@ -19,3 +19,6 @@ action_statements.append("4  : Move Tool")
 
 action.append("MARQUEE_TOOL")
 action_statements.append("5  : Marquee Tool")
+
+action.append("LASSO_TOOL")
+action_statements.append("6  : Lasso Tool")
