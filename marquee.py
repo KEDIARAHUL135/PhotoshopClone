@@ -318,22 +318,23 @@ def EllipticalMarqueeTool(Canvas, window_title):
 
 def CallBackFunc_SRowMarqueeTool(event, x, y, flags, params):
     # Taking global params
-    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, Y_
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, X_, Y_
 
     # Starts selecting - Left button is pressed down
     if event == cv2.EVENT_LBUTTONDOWN:
         selecting = True
         isSelected = False
         FrameToShow = CombinedFrame.copy()
+        X_ = 0
         Y_ = y
-        cv2.line(FrameToShow, (0, Y_), (CanvasShape[1]-1, Y_), (127, 127, 127), 1)
+        cv2.line(FrameToShow, (X_, Y_), (X_ + CanvasShape[1]-1, Y_), (127, 127, 127), 1)
 
     # Selecting the region
     elif event == cv2.EVENT_MOUSEMOVE:
         if selecting:
             FrameToShow = CombinedFrame.copy()
             Y_ = y
-            cv2.line(FrameToShow, (0, Y_), (CanvasShape[1]-1, Y_), (127, 127, 127), 1)
+            cv2.line(FrameToShow, (X_, Y_), (X_ + CanvasShape[1]-1, Y_), (127, 127, 127), 1)
 
     # Stop selecting the layer.
     elif event == cv2.EVENT_LBUTTONUP:
@@ -341,7 +342,7 @@ def CallBackFunc_SRowMarqueeTool(event, x, y, flags, params):
         isSelected = True
         FrameToShow = CombinedFrame.copy()
         Y_ = y
-        cv2.line(FrameToShow, (0, Y_), (CanvasShape[1]-1, Y_), (127, 127, 127), 1)
+        cv2.line(FrameToShow, (X_, Y_), (X_ + CanvasShape[1]-1, Y_), (127, 127, 127), 1)
 
 
 
@@ -365,13 +366,14 @@ def SingleRowMarqueeTool(Canvas, window_title):
     cv2.setMouseCallback(window_title, CallBackFunc_SRowMarqueeTool)
 
     # Setting some params used in callback function
-    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, Y_
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, X_, Y_
     selecting = False       # True if region is being selected      
     isSelected = False      # True if region is selected
     Canvas.CombineLayers()
     CombinedFrame = Canvas.CombinedImage.copy()     # the combined frame of the canvas
     FrameToShow = CombinedFrame.copy()              # The frame which will be shown (with the selected region)
     CanvasShape = Canvas.Shape                      # Shape of the canvas
+    X_ = 0                                          # Starting point of the row selected
     Y_ = 0                                          # Y-coordinate of the row selected
 
 
@@ -395,16 +397,20 @@ def SingleRowMarqueeTool(Canvas, window_title):
         if isSelected:
             if Key == 87 or Key == 119:     # If 'W'/'w' - move up
                 Y_ -= 1
+            if Key == 65 or Key == 97:      # If 'A'/'a' - move left
+                X_ -= 1
             if Key == 83 or Key == 115:     # If 'S'/'s' - move down
                 Y_ += 1
+            if Key == 68 or Key == 100:     # If 'D'/'d' - move right
+                X_ += 1
             
             FrameToShow = CombinedFrame.copy()
-            cv2.line(FrameToShow, (0, Y_), (CanvasShape[1]-1, Y_), (127, 127, 127), 1)
+            cv2.line(FrameToShow, (X_, Y_), (X_ + CanvasShape[1]-1, Y_), (127, 127, 127), 1)
             
 
     if not IsAborted:
         # Correcting rectangular's points
-        Selected_BB = [0, Y_, CanvasShape[1], 1]
+        Selected_BB = [X_, Y_, CanvasShape[1], 1]
         Selected_Mask = np.ones((Selected_BB[3], Selected_BB[2], 1), dtype=np.uint8) * 255
         ExtractSelectedRegion(Canvas, Selected_BB, Selected_Mask, layer_nos_to_copy)
     
@@ -418,7 +424,7 @@ def SingleRowMarqueeTool(Canvas, window_title):
 
 def CallBackFunc_SColMarqueeTool(event, x, y, flags, params):
     # Taking global params
-    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, X_
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, X_, Y_
 
     # Starts selecting - Left button is pressed down
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -426,14 +432,15 @@ def CallBackFunc_SColMarqueeTool(event, x, y, flags, params):
         isSelected = False
         FrameToShow = CombinedFrame.copy()
         X_ = x
-        cv2.line(FrameToShow, (X_, 0), (X_, CanvasShape[0]-1), (127, 127, 127), 1)
+        Y_ = 0
+        cv2.line(FrameToShow, (X_, Y_), (X_, Y_ + CanvasShape[0]-1), (127, 127, 127), 1)
 
     # Selecting the region
     elif event == cv2.EVENT_MOUSEMOVE:
         if selecting:
             FrameToShow = CombinedFrame.copy()
             X_ = x
-            cv2.line(FrameToShow, (X_, 0), (X_, CanvasShape[0]-1), (127, 127, 127), 1)
+            cv2.line(FrameToShow, (X_, Y_), (X_, Y_ + CanvasShape[0]-1), (127, 127, 127), 1)
 
     # Stop selecting the layer.
     elif event == cv2.EVENT_LBUTTONUP:
@@ -441,7 +448,7 @@ def CallBackFunc_SColMarqueeTool(event, x, y, flags, params):
         isSelected = True
         FrameToShow = CombinedFrame.copy()
         X_ = x
-        cv2.line(FrameToShow, (X_, 0), (X_, CanvasShape[0]-1), (127, 127, 127), 1)
+        cv2.line(FrameToShow, (X_, Y_), (X_, Y_ + CanvasShape[0]-1), (127, 127, 127), 1)
 
 
 
@@ -465,7 +472,7 @@ def SingleColMarqueeTool(Canvas, window_title):
     cv2.setMouseCallback(window_title, CallBackFunc_SColMarqueeTool)
 
     # Setting some params used in callback function
-    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, X_
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, X_, Y_
     selecting = False       # True if region is being selected      
     isSelected = False      # True if region is selected
     Canvas.CombineLayers()
@@ -473,6 +480,7 @@ def SingleColMarqueeTool(Canvas, window_title):
     FrameToShow = CombinedFrame.copy()              # The frame which will be shown (with the selected region)
     CanvasShape = Canvas.Shape                      # Shape of the canvas
     X_ = 0                                          # X-coordinate of the column selected
+    Y_ = 0                                          # Y-coordinate of the start point of the line
 
 
     IsAborted = False
@@ -493,18 +501,22 @@ def SingleColMarqueeTool(Canvas, window_title):
         
         # If the region is selected, check if the user is trying to move it
         if isSelected:
+            if Key == 87 or Key == 119:     # If 'W'/'w' - move up
+                Y_ -= 1
             if Key == 65 or Key == 97:      # If 'A'/'a' - move left
                 X_ -= 1
+            if Key == 83 or Key == 115:     # If 'S'/'s' - move down
+                Y_ += 1
             if Key == 68 or Key == 100:     # If 'D'/'d' - move right
                 X_ += 1
             
             FrameToShow = CombinedFrame.copy()
-            cv2.line(FrameToShow, (X_, 0), (X_, CanvasShape[0]-1), (127, 127, 127), 1)
+            cv2.line(FrameToShow, (X_, Y_), (X_, Y_ + CanvasShape[0]-1), (127, 127, 127), 1)
             
 
     if not IsAborted:
         # Correcting rectangular's points
-        Selected_BB = [X_, 0, 1, CanvasShape[0]]
+        Selected_BB = [X_, Y_, 1, CanvasShape[0]]
         Selected_Mask = np.ones((Selected_BB[3], Selected_BB[2], 1), dtype=np.uint8) * 255
         ExtractSelectedRegion(Canvas, Selected_BB, Selected_Mask, layer_nos_to_copy)
     
