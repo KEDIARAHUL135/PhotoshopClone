@@ -461,9 +461,9 @@ def LassoTool(Canvas, window_title):
             lasso.LassoTool(Canvas, window_title)
             break
 
-        # elif 'p' in command or 'P' in command:      # 'p'/'P' entered -> Polygon Lasso Tool
-        #     lasso.PolygonLassoTool(Canvas, window_title)
-        #     break
+        elif 'p' in command or 'P' in command:      # 'p'/'P' entered -> Polygon Lasso Tool
+            lasso.PolygonLassoTool(Canvas, window_title)
+            break
 
         # elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magnetic Lasso Tool
         #     lasso.MagneticLassoTool(Canvas, window_title)
