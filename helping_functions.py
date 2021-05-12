@@ -128,12 +128,12 @@ def ShiftContour(Contour, ToOrigin=True, ShiftBy=[0, 0], Get_Mask_BB=False):
     # If shift contour to origin, we will have to shift it by the 
     # value equal to its bounding box's top left coorner coordinate
     if ToOrigin:
-        ShiftBy = [x, y]
+        ShiftBy = [-x, -y]
 
     # Shifting the contour
     ShiftedContour = []
     for i in range(len(Contour)):
-        ShiftedContour.append([[(Contour[i][0][0] - ShiftBy[0]), (Contour[i][0][1] - ShiftBy[1])]])
+        ShiftedContour.append([[(Contour[i][0][0] + ShiftBy[0]), (Contour[i][0][1] + ShiftBy[1])]])
 
 
     # If bounding box and mask image are asked

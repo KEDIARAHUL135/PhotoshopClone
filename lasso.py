@@ -103,13 +103,11 @@ def LassoTool(Canvas, window_title):
             
 
     if not IsAborted:
-        # Finding Selected regions bounding box and its contour shifted to origin
-        Selected_BB = list(cv2.boundingRect(np.array(SelectedContour)))
-        SelectedContourToOrigin = hf.ShiftContour(SelectedContour)
+        # Finding Selected regions bounding box, its contour shifted to origin, and its shifted mask image
+        # Selected_BB = list(cv2.boundingRect(np.array(SelectedContour)))
+        SelectedContourToOrigin, Selected_Mask, Selected_BB = hf.ShiftContour(SelectedContour, Get_Mask_BB=True)
 
-        # Getting Mask of the selected region
-        Selected_Mask = np.zeros((Selected_BB[3], Selected_BB[2], 1), dtype=np.uint8)
-        cv2.drawContours(Selected_Mask, [np.array(SelectedContourToOrigin)], -1, 255, 1)
+        # Redrawing mask to conver any uncovered area
         OuterContour, _ = cv2.findContours(Selected_Mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(Selected_Mask, OuterContour, -1, 255, -1)
 
