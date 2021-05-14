@@ -252,69 +252,72 @@ def PolygonLassoTool(Canvas, window_title):
 ########################################################### Magnetic Lasso Tool #######################################################################
 
 
-def Dij_SetDist():
-    global Dist, CombinedFrame
-    Dist = [None] * 9
+def Dij_SetWeights():
+    global Weights, CombinedFrame
+    Weights = [None] * 9
 
     # Storing the weights of each neighbours in list of length 9
     # [0 1 2]
     # [3 4 5]
     # [6 7 8]
-    Weights = [None] * 9
+    Kernels = [None] * 9
 
-    Weights[0] = np.array([[    0,   0.7,     0],
+    Kernels[0] = np.array([[    0,   0.7,     0],
                            [ -0.7,     0,     0],
                            [    0,     0,     0]], dtype=np.float32)
-    Weights[1] = np.array([[-0.25,     0,  0.25],
+    Kernels[1] = np.array([[-0.25,     0,  0.25],
                            [-0.25,     0,  0.25],
                            [    0,     0,     0]], dtype=np.float32)
-    Weights[2] = np.array([[    0,   0.7,     0],
+    Kernels[2] = np.array([[    0,   0.7,     0],
                            [    0,     0,  -0.7],
                            [    0,     0,     0]], dtype=np.float32)
-    Weights[3] = np.array([[ 0.25,  0.25,     0],
+    Kernels[3] = np.array([[ 0.25,  0.25,     0],
                            [    0,     0,     0],
                            [-0.25, -0.25,     0]], dtype=np.float32)
-    Weights[4] = np.array([[    0,     0,     0],
+    Kernels[4] = np.array([[    0,     0,     0],
                            [    0, 10**6,     0],
                            [    0,     0,     0]], dtype=np.float32)
-    Weights[5] = np.array([[    0, -0.25, -0.25],
+    Kernels[5] = np.array([[    0, -0.25, -0.25],
                            [    0,     0,     0],
                            [    0,  0.25,  0.25]], dtype=np.float32)
-    Weights[6] = np.array([[    0,     0,     0],
+    Kernels[6] = np.array([[    0,     0,     0],
                            [ -0.7,     0,     0],
                            [    0,   0.7,     0]], dtype=np.float32)
-    Weights[7] = np.array([[    0,     0,     0],
+    Kernels[7] = np.array([[    0,     0,     0],
                            [ 0.25,     0, -0.25],
                            [ 0.25,     0, -0.25]], dtype=np.float32)
-    Weights[8] = np.array([[    0,     0,     0],
+    Kernels[8] = np.array([[    0,     0,     0],
                            [    0,     0,   0.7],
                            [    0,  -0.7,     0]], dtype=np.float32)
 
     
-    # Finding distances
+    # Finding weights
     for i in range(9):
         # Applying convolution
         # Temp will be 3 channeled image
-        Temp = cv2.filter2D(CombinedFrame, -1, Weights[i])
+        Temp = cv2.filter2D(CombinedFrame, -1, Kernels[i])
 
-        # Merging the channels to get distances as: B^2 + G^2 + R^2 + 0.01
-        # This will ensure that distances are positive and non zero (For Dijsktra's algo)
+        # Merging the channels to get weights as: B^2 + G^2 + R^2 + 0.01
+        # This will ensure that weights are positive and non zero (For Dijsktra's algo)
         # Compliment of B, G, R will be taken to support larger differences
         B, G, R = cv2.split(Temp)
         B = 255 - B
         G = 255 - G
         R = 255 - R
-        Dist[i] = B*B + G*G + R*R + 0.01
-        
+        Weights[i] = B*B + G*G + R*R + 0.01
+
 
 
 
 def Dij_ShortestPath():
-    global dij_src, dij_end, Dist
+    global dij_src, dij_end, Weights
 
-    # Setting Dist of neighbours
-    if Dist is None:
-        Dij_SetDist()
+    # Setting Weights of neighbours
+    if Weights is None:
+        Dij_SetWeights()
+
+    
+
 
 
 def CallBackFunc_MagLassoTool(event, x, y, flags, params):
@@ -399,7 +402,7 @@ def MagneticLassoTool(Canvas, window_title):
     cv2.setMouseCallback(window_title, CallBackFunc_MagLassoTool)
 
     # Setting some params used in callback function
-    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, SelectedContour, dij_src, dij_end, RunningPoints, FinalPoints, Dist
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, SelectedContour, dij_src, dij_end, RunningPoints, FinalPoints, Weights
     selecting = False       # True if region is being selected      
     isSelected = False      # True if region is selected
     Canvas.CombineLayers()
@@ -411,7 +414,7 @@ def MagneticLassoTool(Canvas, window_title):
     FinalPoints = []                                # The points that are finalized
     dij_src = None                                  # Strat point of dijstra's algo
     dij_end = None                                  # End point of dijstra's algo
-    Dist = None                                     # Dist of all the neighbours for each pixel in the image
+    Weights = None                                  # Weights of all the neighbours for each pixel in the image
 
     IsAborted = False
     while True:
