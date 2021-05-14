@@ -253,9 +253,60 @@ def PolygonLassoTool(Canvas, window_title):
 
 
 def Dij_SetDist():
-    global Dist
+    global Dist, CombinedFrame
+    Dist = [None] * 9
+
+    # Storing the weights of each neighbours in list of length 9
+    # [0 1 2]
+    # [3 4 5]
+    # [6 7 8]
+    Weights = [None] * 9
+
+    Weights[0] = np.array([[    0,   0.7,     0],
+                           [ -0.7,     0,     0],
+                           [    0,     0,     0]], dtype=np.float32)
+    Weights[1] = np.array([[-0.25,     0,  0.25],
+                           [-0.25,     0,  0.25],
+                           [    0,     0,     0]], dtype=np.float32)
+    Weights[2] = np.array([[    0,   0.7,     0],
+                           [    0,     0,  -0.7],
+                           [    0,     0,     0]], dtype=np.float32)
+    Weights[3] = np.array([[ 0.25,  0.25,     0],
+                           [    0,     0,     0],
+                           [-0.25, -0.25,     0]], dtype=np.float32)
+    Weights[4] = np.array([[    0,     0,     0],
+                           [    0, 10**6,     0],
+                           [    0,     0,     0]], dtype=np.float32)
+    Weights[5] = np.array([[    0, -0.25, -0.25],
+                           [    0,     0,     0],
+                           [    0,  0.25,  0.25]], dtype=np.float32)
+    Weights[6] = np.array([[    0,     0,     0],
+                           [ -0.7,     0,     0],
+                           [    0,   0.7,     0]], dtype=np.float32)
+    Weights[7] = np.array([[    0,     0,     0],
+                           [ 0.25,     0, -0.25],
+                           [ 0.25,     0, -0.25]], dtype=np.float32)
+    Weights[8] = np.array([[    0,     0,     0],
+                           [    0,     0,   0.7],
+                           [    0,  -0.7,     0]], dtype=np.float32)
 
     
+    # Finding distances
+    for i in range(9):
+        # Applying convolution
+        # Temp will be 3 channeled image
+        Temp = cv2.filter2D(CombinedFrame, -1, Weights[i])
+
+        # Merging the channels to get distances as: B^2 + G^2 + R^2 + 0.01
+        # This will ensure that distances are positive and non zero (For Dijsktra's algo)
+        # Compliment of B, G, R will be taken to support larger differences
+        B, G, R = cv2.split(Temp)
+        B = 255 - B
+        G = 255 - G
+        R = 255 - R
+        Dist[i] = B*B + G*G + R*R + 0.01
+        
+
 
 
 def Dij_ShortestPath():
@@ -360,7 +411,7 @@ def MagneticLassoTool(Canvas, window_title):
     FinalPoints = []                                # The points that are finalized
     dij_src = None                                  # Strat point of dijstra's algo
     dij_end = None                                  # End point of dijstra's algo
-    Dist = None                                  # Dist of all the neighbours for each pixel in the image
+    Dist = None                                     # Dist of all the neighbours for each pixel in the image
 
     IsAborted = False
     while True:
