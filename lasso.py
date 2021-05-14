@@ -1,3 +1,4 @@
+from typing import Final
 import cv2
 import numpy as np
 
@@ -308,16 +309,149 @@ def Dij_SetWeights():
 
 
 
+def FindMinDistPt(Distances, Queue):
+    minDist = float("Inf")          # Minimum distance point found
+    minDistPt = [-1, -1, -1]   # Index of minimum distance point : [x, y, rowMajor]
+
+    for row in range(CanvasShape[0]):
+        for col in range(CanvasShape[1]):
+            if Distances[row][col] < minDist:
+                rm = hf.ToRowMajor(col, row, CanvasShape[1])
+                if rm in Queue:
+                    minDist = Distances[row][col]
+                    minDistPt = [col, row, rm]
+
+    return minDistPt
+
+
+def UpdateDist_nd_Parent(Pt, Distances, Parent, Queue):
+    global Weights, CanvasShape
+
+    x, y, rm = Pt
+
+    # Top - Left
+    if x > 0 and y > 0 and hf.ToRowMajor(x-1, y-1, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[0][y-1][x-1] < Distances[y-1][x-1]:
+            Distances[y-1][x-1] = Distances[y][x] + Weights[0][y-1][x-1]
+            Parent[y-1][x-1] = [x, y]
+    
+    # Top
+    if y > 0 and hf.ToRowMajor(x, y-1, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[1][y-1][x] < Distances[y-1][x]:
+            Distances[y-1][x] = Distances[y][x] + Weights[0][y-1][x]
+            Parent[y-1][x] = [x, y]
+
+    # Top - Right
+    if x < (CanvasShape[1] - 1) and y > 0 and hf.ToRowMajor(x+1, y-1, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[2][y-1][x+1] < Distances[y-1][x+1]:
+            Distances[y-1][x+1] = Distances[y][x] + Weights[0][y-1][x+1]
+            Parent[y-1][x+1] = [x, y]
+    
+    # Left
+    if x > 0 and hf.ToRowMajor(x-1, y, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[3][y][x-1] < Distances[y][x-1]:
+            Distances[y][x-1] = Distances[y][x] + Weights[0][y][x-1]
+            Parent[y][x-1] = [x, y]
+    
+    # Middle
+    #### No need to consider middle one
+
+    # Right
+    if x < (CanvasShape[1] - 1) and hf.ToRowMajor(x+1, y, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[5][y][x+1] < Distances[y][x+1]:
+            Distances[y][x+1] = Distances[y][x] + Weights[0][y][x+1]
+            Parent[y][x+1] = [x, y]
+    
+    # Bottom - Left
+    if x > 0 and y < (CanvasShape[0] - 1) and hf.ToRowMajor(x-1, y+1, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[6][y+1][x-1] < Distances[y+1][x-1]:
+            Distances[y+1][x-1] = Distances[y][x] + Weights[0][y+1][x-1]
+            Parent[y+1][x-1] = [x, y]
+    
+    # Bottom
+    if y < (CanvasShape[0] - 1) and hf.ToRowMajor(x, y+1, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[7][y+1][x] < Distances[y+1][x]:
+            Distances[y+1][x] = Distances[y][x] + Weights[0][y+1][x]
+            Parent[y+1][x] = [x, y]
+
+    # Bottom - Right
+    if x < (CanvasShape[1] - 1) and y < (CanvasShape[0] - 1) and hf.ToRowMajor(x+1, y+1, CanvasShape[1]) in Queue:
+        if Distances[y][x] + Weights[8][y+1][x+1] < Distances[y+1][x+1]:
+            Distances[y+1][x+1] = Distances[y][x] + Weights[0][y+1][x+1]
+            Parent[y+1][x+1] = [x, y]
+    
+    return Distances, Parent
+
+
+def ExtractParentPath(dij_end, Parent):
+    # Shortest path
+    Path = []
+
+    currentPt = [dij_end[0], dij_end[1]]
+    while currentPt[0] != -1:
+        # Adding this point to path
+        Path.append(currentPt)
+
+        # Getting parent and updating current point
+        currentPt = Parent[currentPt[1]][currentPt[0]].copy()
+
+    # Reversing the path (to get from src to end)
+    Path.reverse()
+    
+    return Path
+
 
 def Dij_ShortestPath():
-    global dij_src, dij_end, Weights
+    global dij_src, dij_end, Weights, CanvasShape, RunningPoints
 
     # Setting Weights of neighbours
     if Weights is None:
         Dij_SetWeights()
 
-    
+    # Distances of the points from source
+    Distances = np.ones((CanvasShape[0], CanvasShape[1], 1), dtype=np.float32) * 100000000.0
+    Distances[dij_src[1]][dij_src[0]] = 0       # Distance of source to source is zero
 
+    # Parents of all the points
+    # [-1, -1] for no parent (source node)
+    Parent = [[[-1, -1] for j in range(CanvasShape[1])] for i in range(CanvasShape[0])]
+
+    # Adding all points in queue is row major 
+    # [ rowMajor(x, y) = x + y*CanvasShape[1] ]
+    # [ x = rowMajor(x, y) % CanvasShape[1] ; y = rowMajor(x, y) // CanvasShape[1] ]
+    Queue = [i for i in range(CanvasShape[0] * CanvasShape[1])]
+
+    # Finding shortest path for all vertices
+    while Queue:
+        # Getting the index of minimum distance point
+        minDistPt = FindMinDistPt(Distances, Queue)
+
+        # Removing min distance point from queue
+        Queue.remove(minDistPt[2])
+
+        # Updating distance values and parent of the neighbouring points
+        # Consider only those points which are still in Queue
+        Distances, Parent = UpdateDist_nd_Parent(minDistPt, Distances, Parent, Queue)
+
+    
+    # Getting the shortest path from src to end
+    RunningPoints = ExtractParentPath(dij_end, Parent)
+
+
+
+def DrawPoints(Image, Points, Colour=[127, 127, 127]):
+    for i in range(len(Points)):
+        Image[Points[i][1]][Points[i][0]] = Colour
+
+    return Image
+
+
+def CvtPointsToContour(Points):
+    Contour = []
+    for i in range(len(Points)):
+        Contour.append([[Points[i][0], Points[i][1]]])
+
+    return Contour
 
 
 def CallBackFunc_MagLassoTool(event, x, y, flags, params):
@@ -354,16 +488,19 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
             else:
                 pass
                 # Add shortest path to final points
+                FinalPoints += RunningPoints
                 dij_src = [x, y]
 
 
     # Selecting the region
     elif event == cv2.EVENT_MOUSEMOVE:
         if selecting:
-            FrameToShow = CombinedFrame.copy()
             # Call dijsktra's 
+            Dij_ShortestPath()
             # Draw selected and running
-            # cv2.drawContours(FrameToShow, [np.array(ContourCopy)], -1, (127, 127, 127), 1)
+            FrameToShow = CombinedFrame.copy()
+            FrameToShow = DrawPoints(FrameToShow, FinalPoints, Colour=[0, 255, 0])
+            FrameToShow = DrawPoints(FrameToShow, RunningPoints, Colour=[0, 0, 255])
 
 
     # Stop selecting the layer.
@@ -371,15 +508,17 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
         isSelected = True
         selecting = False
         # Check final points size here
-        # if len(SelectedContour) <= 2:
-            # SelectedContour = []
-            # isSelected = False
+        if len(FinalPoints) <= 2:
+            FinalPoints = []
+            isSelected = False
         
         # Add last running points to final points
+        FinalPoints += RunningPoints
         # Convert finalPoints to Selected Contour
-        FrameToShow = CombinedFrame.copy()
+        SelectedContour = CvtPointsToContour(FinalPoints)
         # Draw contour
-        # cv2.drawContours(FrameToShow, [np.array(SelectedContour)], -1, (127, 127, 127), 1)
+        FrameToShow = CombinedFrame.copy()
+        cv2.drawContours(FrameToShow, [np.array(SelectedContour)], -1, (0, 255, 0), 1)#(127, 127, 127), 1)
 
 
 def MagneticLassoTool(Canvas, window_title):

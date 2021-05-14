@@ -147,3 +147,7 @@ def ShiftContour(Contour, ToOrigin=True, ShiftBy=[0, 0], Get_Mask_BB=False):
     # If only shifted contour required
     else:
         return ShiftedContour
+
+
+def ToRowMajor(x, y, NumOfCols):
+    return (x + (y * NumOfCols))
