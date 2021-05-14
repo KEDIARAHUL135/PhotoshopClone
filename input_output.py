@@ -465,9 +465,9 @@ def LassoTool(Canvas, window_title):
             lasso.PolygonLassoTool(Canvas, window_title)
             break
 
-        # elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magnetic Lasso Tool
-        #     lasso.MagneticLassoTool(Canvas, window_title)
-        #     break
+        elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magnetic Lasso Tool
+            lasso.MagneticLassoTool(Canvas, window_title)
+            break
         
         else:                                       # If invalid command is passed.
             print("Invalid command passed. Enter command again.\n")
