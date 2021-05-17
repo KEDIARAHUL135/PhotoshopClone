@@ -151,3 +151,9 @@ def ShiftContour(Contour, ToOrigin=True, ShiftBy=[0, 0], Get_Mask_BB=False):
 
 def ToRowMajor(x, y, NumOfCols):
     return (x + (y * NumOfCols))
+
+def RevertRowMajor(RowMajor, NumOfCols):
+    x = RowMajor % NumOfCols
+    y = RowMajor // NumOfCols
+
+    return x, y

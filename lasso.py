@@ -315,10 +315,11 @@ def Dij_SetWeights():
 
     
     # Finding weights
+    BlurredFrame = cv2.blur(CombinedFrame, (3, 3))
     for i in range(9):
         # Applying convolution
         # Temp will be 3 channeled image
-        Temp = cv2.filter2D(CombinedFrame, -1, Kernels[i])
+        Temp = cv2.filter2D(BlurredFrame, -1, Kernels[i])
 
         # Merging the channels to get weights as: B^2 + G^2 + R^2 + 0.01
         # This will ensure that weights are positive and non zero (For Dijsktra's algo)
@@ -337,13 +338,11 @@ def FindMinDistPt(Distances, Queue):
     minDist = float("Inf")          # Minimum distance point found
     minDistPt = [-1, -1, -1]   # Index of minimum distance point : [x, y, rowMajor]
 
-    for row in range(ROI_Shape[0]):
-        for col in range(ROI_Shape[1]):
-            if Distances[row][col] < minDist:
-                rm = hf.ToRowMajor(col, row, ROI_Shape[1])
-                if rm in Queue:
-                    minDist = Distances[row][col]
-                    minDistPt = [col, row, rm]
+    for rm in Queue:
+        x, y = hf.RevertRowMajor(rm, ROI_Shape[1])
+        if Distances[y][x] < minDist:
+            minDist = Distances[y][x]
+            minDistPt = [x, y, rm]
 
     return minDistPt
 
