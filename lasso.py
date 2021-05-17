@@ -253,6 +253,28 @@ def PolygonLassoTool(Canvas, window_title):
 ########################################################### Magnetic Lasso Tool #######################################################################
 
 
+def Dij_SetROI():
+    global CombinedFrame, CanvasShape, dij_src_F, dij_end_F, RunningPoints_F, FinalPoints_F, Weights
+    global ROI_Frame, ROI_Shape, dij_src_roi, dij_end_roi, ROI_Rect, ROI_Weights
+
+    # Getting ROI's bounding rect
+    ExtraROIBoundary = 60
+    ROI_w = abs(dij_src_F[0] - dij_end_F[0]) + (ExtraROIBoundary * 2)
+    ROI_h = abs(dij_src_F[1] - dij_end_F[1]) + (ExtraROIBoundary * 2)
+    ROI_x = min(dij_src_F[0], dij_end_F[0]) - ExtraROIBoundary
+    ROI_y = min(dij_src_F[1], dij_end_F[1]) - ExtraROIBoundary
+    [ROI_x, ROI_y, ROI_w, ROI_h] = hf.Intersection([0, 0, CanvasShape[1], CanvasShape[0]], [ROI_x, ROI_y, ROI_w, ROI_h])
+
+    # Setting global variables
+    ROI_Rect = [ROI_x, ROI_y, ROI_w, ROI_h]
+    ROI_Shape = [ROI_h, ROI_w]
+    ROI_Frame = CombinedFrame[ROI_y : ROI_y + ROI_h, ROI_x : ROI_x + ROI_w]
+    dij_src_roi = [dij_src_F[0] - ROI_x, dij_src_F[1] - ROI_y]
+    dij_end_roi = [dij_end_F[0] - ROI_x, dij_end_F[1] - ROI_y]
+    ROI_Weights = np.asarray(Weights)[ : , ROI_y : ROI_y + ROI_h, ROI_x : ROI_x + ROI_w]
+
+
+
 def Dij_SetWeights():
     global Weights, CombinedFrame
     Weights = [None] * 9
@@ -310,13 +332,15 @@ def Dij_SetWeights():
 
 
 def FindMinDistPt(Distances, Queue):
+    global ROI_Shape
+
     minDist = float("Inf")          # Minimum distance point found
     minDistPt = [-1, -1, -1]   # Index of minimum distance point : [x, y, rowMajor]
 
-    for row in range(CanvasShape[0]):
-        for col in range(CanvasShape[1]):
+    for row in range(ROI_Shape[0]):
+        for col in range(ROI_Shape[1]):
             if Distances[row][col] < minDist:
-                rm = hf.ToRowMajor(col, row, CanvasShape[1])
+                rm = hf.ToRowMajor(col, row, ROI_Shape[1])
                 if rm in Queue:
                     minDist = Distances[row][col]
                     minDistPt = [col, row, rm]
@@ -325,69 +349,69 @@ def FindMinDistPt(Distances, Queue):
 
 
 def UpdateDist_nd_Parent(Pt, Distances, Parent, Queue):
-    global Weights, CanvasShape
+    global ROI_Weights, ROI_Shape, ROI_Rect
 
     x, y, rm = Pt
 
     # Top - Left
-    if x > 0 and y > 0 and hf.ToRowMajor(x-1, y-1, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[0][y-1][x-1] < Distances[y-1][x-1]:
-            Distances[y-1][x-1] = Distances[y][x] + Weights[0][y-1][x-1]
+    if x > 0 and y > 0 and hf.ToRowMajor(x-1, y-1, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[0][y-1][x-1] < Distances[y-1][x-1]:
+            Distances[y-1][x-1] = Distances[y][x] + ROI_Weights[0][y-1][x-1]
             Parent[y-1][x-1] = [x, y]
     
     # Top
-    if y > 0 and hf.ToRowMajor(x, y-1, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[1][y-1][x] < Distances[y-1][x]:
-            Distances[y-1][x] = Distances[y][x] + Weights[0][y-1][x]
+    if y > 0 and hf.ToRowMajor(x, y-1, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[1][y-1][x] < Distances[y-1][x]:
+            Distances[y-1][x] = Distances[y][x] + ROI_Weights[0][y-1][x]
             Parent[y-1][x] = [x, y]
 
     # Top - Right
-    if x < (CanvasShape[1] - 1) and y > 0 and hf.ToRowMajor(x+1, y-1, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[2][y-1][x+1] < Distances[y-1][x+1]:
-            Distances[y-1][x+1] = Distances[y][x] + Weights[0][y-1][x+1]
+    if x < (ROI_Shape[1] - 1) and y > 0 and hf.ToRowMajor(x+1, y-1, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[2][y-1][x+1] < Distances[y-1][x+1]:
+            Distances[y-1][x+1] = Distances[y][x] + ROI_Weights[0][y-1][x+1]
             Parent[y-1][x+1] = [x, y]
     
     # Left
-    if x > 0 and hf.ToRowMajor(x-1, y, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[3][y][x-1] < Distances[y][x-1]:
-            Distances[y][x-1] = Distances[y][x] + Weights[0][y][x-1]
+    if x > 0 and hf.ToRowMajor(x-1, y, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[3][y][x-1] < Distances[y][x-1]:
+            Distances[y][x-1] = Distances[y][x] + ROI_Weights[0][y][x-1]
             Parent[y][x-1] = [x, y]
     
     # Middle
     #### No need to consider middle one
 
     # Right
-    if x < (CanvasShape[1] - 1) and hf.ToRowMajor(x+1, y, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[5][y][x+1] < Distances[y][x+1]:
-            Distances[y][x+1] = Distances[y][x] + Weights[0][y][x+1]
+    if x < (ROI_Shape[1] - 1) and hf.ToRowMajor(x+1, y, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[5][y][x+1] < Distances[y][x+1]:
+            Distances[y][x+1] = Distances[y][x] + ROI_Weights[0][y][x+1]
             Parent[y][x+1] = [x, y]
     
     # Bottom - Left
-    if x > 0 and y < (CanvasShape[0] - 1) and hf.ToRowMajor(x-1, y+1, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[6][y+1][x-1] < Distances[y+1][x-1]:
-            Distances[y+1][x-1] = Distances[y][x] + Weights[0][y+1][x-1]
+    if x > 0 and y < (ROI_Shape[0] - 1) and hf.ToRowMajor(x-1, y+1, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[6][y+1][x-1] < Distances[y+1][x-1]:
+            Distances[y+1][x-1] = Distances[y][x] + ROI_Weights[0][y+1][x-1]
             Parent[y+1][x-1] = [x, y]
     
     # Bottom
-    if y < (CanvasShape[0] - 1) and hf.ToRowMajor(x, y+1, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[7][y+1][x] < Distances[y+1][x]:
-            Distances[y+1][x] = Distances[y][x] + Weights[0][y+1][x]
+    if y < (ROI_Shape[0] - 1) and hf.ToRowMajor(x, y+1, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[7][y+1][x] < Distances[y+1][x]:
+            Distances[y+1][x] = Distances[y][x] + ROI_Weights[0][y+1][x]
             Parent[y+1][x] = [x, y]
 
     # Bottom - Right
-    if x < (CanvasShape[1] - 1) and y < (CanvasShape[0] - 1) and hf.ToRowMajor(x+1, y+1, CanvasShape[1]) in Queue:
-        if Distances[y][x] + Weights[8][y+1][x+1] < Distances[y+1][x+1]:
-            Distances[y+1][x+1] = Distances[y][x] + Weights[0][y+1][x+1]
+    if x < (ROI_Shape[1] - 1) and y < (ROI_Shape[0] - 1) and hf.ToRowMajor(x+1, y+1, ROI_Shape[1]) in Queue:
+        if Distances[y][x] + ROI_Weights[8][y+1][x+1] < Distances[y+1][x+1]:
+            Distances[y+1][x+1] = Distances[y][x] + ROI_Weights[0][y+1][x+1]
             Parent[y+1][x+1] = [x, y]
     
     return Distances, Parent
 
 
-def ExtractParentPath(dij_end, Parent):
+def ExtractParentPath(dij_end_roi, Parent):
     # Shortest path
     Path = []
 
-    currentPt = [dij_end[0], dij_end[1]]
+    currentPt = [dij_end_roi[0], dij_end_roi[1]]
     while currentPt[0] != -1:
         # Adding this point to path
         Path.append(currentPt)
@@ -401,25 +425,47 @@ def ExtractParentPath(dij_end, Parent):
     return Path
 
 
+def RunningPoints_to_frame(InitialPoints, f_x, f_y):
+    FinalPoints = []
+    for i in range(len(InitialPoints)):
+        FinalPoints.append([InitialPoints[i][0] + f_x, InitialPoints[i][1] + f_y])
+    
+    return FinalPoints
+
+
+
 def Dij_ShortestPath():
-    global dij_src, dij_end, Weights, CanvasShape, RunningPoints
+    global dij_src_F, dij_end_F, Weights, CanvasShape, RunningPoints_F, \
+            dij_src_roi, dij_end_roi, ROI_Shape, ROI_Rect, RunningPoints_roi
+
+    # If dij_src_F and dij_end_F are neighbours - directly update running points 
+    if abs(dij_src_F[0] - dij_end_F[0]) <= 1 and abs(dij_src_F[1] - dij_end_F[1]) <= 1:
+        if dij_src_F[0] == dij_end_F[0] and dij_src_F[1] == dij_end_F[1]:
+            RunningPoints_F = [[dij_src_F[0], dij_src_F[1]]]
+        else:
+            RunningPoints_F = [[dij_src_F[0], dij_src_F[1]],
+                             [dij_end_F[0], dij_end_F[1]]]
+        return
 
     # Setting Weights of neighbours
     if Weights is None:
         Dij_SetWeights()
 
+    # Setting ROI for Dijsktra's
+    Dij_SetROI()
+
     # Distances of the points from source
-    Distances = np.ones((CanvasShape[0], CanvasShape[1], 1), dtype=np.float32) * 100000000.0
-    Distances[dij_src[1]][dij_src[0]] = 0       # Distance of source to source is zero
+    Distances = np.ones((ROI_Shape[0], ROI_Shape[1], 1), dtype=np.float32) * 100000000.0
+    Distances[dij_src_roi[1]][dij_src_roi[0]] = 0       # Distance of source to source is zero
 
     # Parents of all the points
     # [-1, -1] for no parent (source node)
-    Parent = [[[-1, -1] for j in range(CanvasShape[1])] for i in range(CanvasShape[0])]
+    Parent = [[[-1, -1] for j in range(ROI_Shape[1])] for i in range(ROI_Shape[0])]
 
     # Adding all points in queue is row major 
-    # [ rowMajor(x, y) = x + y*CanvasShape[1] ]
-    # [ x = rowMajor(x, y) % CanvasShape[1] ; y = rowMajor(x, y) // CanvasShape[1] ]
-    Queue = [i for i in range(CanvasShape[0] * CanvasShape[1])]
+    # [ rowMajor(x, y) = x + y*FrameShape[1] ]
+    # [ x = rowMajor(x, y) % FrameShape[1] ; y = rowMajor(x, y) // FrameShape[1] ]
+    Queue = [i for i in range(ROI_Shape[0] * ROI_Shape[1])]
 
     # Finding shortest path for all vertices
     while Queue:
@@ -435,7 +481,10 @@ def Dij_ShortestPath():
 
     
     # Getting the shortest path from src to end
-    RunningPoints = ExtractParentPath(dij_end, Parent)
+    RunningPoints_roi = ExtractParentPath(dij_end_roi, Parent)
+
+    # Converting Running point from wrt roi to frame
+    RunningPoints_F = RunningPoints_to_frame(RunningPoints_roi, ROI_Rect[0], ROI_Rect[1])
 
 
 
@@ -456,7 +505,8 @@ def CvtPointsToContour(Points):
 
 def CallBackFunc_MagLassoTool(event, x, y, flags, params):
     # Taking global params
-    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, SelectedContour, dij_src, dij_end, RunningPoints, FinalPoints
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, SelectedContour, \
+            dij_src_F, dij_end_F, RunningPoints_F, FinalPoints_F, RunningPoints_roi
 
     # If while selecting the region, mouse goes out of the frame, then clip it position 
     # to the nearest corner/edge of the frame
@@ -464,33 +514,35 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
         x, y = hf.Correct_xy_While_Selecting(x, y, [0, CanvasShape[1]-1], [0, CanvasShape[0]-1])    
     
     # Setting dijsktra's end point to mouse cursor's current coordinate
-    dij_end = [x, y]
+    dij_end_F = [x, y]
 
     # Starts selecting - Left button is pressed down
     if event == cv2.EVENT_FLAG_LBUTTON:
         if isSelected:
             isSelected = False
             selecting = True
-            dij_src = [x, y]
-            RunningPoints = []
-            FinalPoints = []
+            dij_src_F = [x, y]
+            RunningPoints_F = []
+            RunningPoints_roi = []
+            FinalPoints_F = []
             SelectedContour = []
             # Call dijsktra's ----- is needed
+            # Dij_ShortestPath()
             
         else:
             if not selecting:
                 selecting = True
-                dij_src = [x, y]
-                RunningPoints = []
-                FinalPoints = []
+                dij_src_F = [x, y]
+                RunningPoints_F = []
+                RunningPoints_roi = []
+                FinalPoints_F = []
                 # Call dijsktra's ----- is needed
+                # Dij_ShortestPath()
 
             else:
-                pass
                 # Add shortest path to final points
-                FinalPoints += RunningPoints
-                dij_src = [x, y]
-
+                FinalPoints_F += RunningPoints_F
+                dij_src_F = [x, y]
 
     # Selecting the region
     elif event == cv2.EVENT_MOUSEMOVE:
@@ -499,8 +551,8 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
             Dij_ShortestPath()
             # Draw selected and running
             FrameToShow = CombinedFrame.copy()
-            FrameToShow = DrawPoints(FrameToShow, FinalPoints, Colour=[0, 255, 0])
-            FrameToShow = DrawPoints(FrameToShow, RunningPoints, Colour=[0, 0, 255])
+            FrameToShow = DrawPoints(FrameToShow, FinalPoints_F, Colour=[0, 255, 0])
+            FrameToShow = DrawPoints(FrameToShow, RunningPoints_F, Colour=[0, 0, 255])
 
 
     # Stop selecting the layer.
@@ -508,14 +560,14 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
         isSelected = True
         selecting = False
         # Check final points size here
-        if len(FinalPoints) <= 2:
-            FinalPoints = []
+        if len(FinalPoints_F) <= 2:
+            FinalPoints_F = []
             isSelected = False
         
         # Add last running points to final points
-        FinalPoints += RunningPoints
+        FinalPoints_F += RunningPoints_F
         # Convert finalPoints to Selected Contour
-        SelectedContour = CvtPointsToContour(FinalPoints)
+        SelectedContour = CvtPointsToContour(FinalPoints_F)
         # Draw contour
         FrameToShow = CombinedFrame.copy()
         cv2.drawContours(FrameToShow, [np.array(SelectedContour)], -1, (0, 255, 0), 1)#(127, 127, 127), 1)
@@ -541,7 +593,9 @@ def MagneticLassoTool(Canvas, window_title):
     cv2.setMouseCallback(window_title, CallBackFunc_MagLassoTool)
 
     # Setting some params used in callback function
-    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, SelectedContour, dij_src, dij_end, RunningPoints, FinalPoints, Weights
+    global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, SelectedContour, \
+            dij_src_F, dij_end_F, RunningPoints_F, FinalPoints_F, Weights, \
+            ROI_Frame, ROI_Shape, dij_src_roi, dij_end_roi, ROI_Rect, RunningPoints_roi, ROI_Weights
     selecting = False       # True if region is being selected      
     isSelected = False      # True if region is selected
     Canvas.CombineLayers()
@@ -549,11 +603,14 @@ def MagneticLassoTool(Canvas, window_title):
     FrameToShow = CombinedFrame.copy()              # The frame which will be shown (with the selected region)
     CanvasShape = Canvas.Shape                      # Shape of the canvas
     SelectedContour = []                            # Contour of the selected region
-    RunningPoints = []                              # The points that are being selected
-    FinalPoints = []                                # The points that are finalized
-    dij_src = None                                  # Strat point of dijstra's algo
-    dij_end = None                                  # End point of dijstra's algo
+    RunningPoints_F = []                              # The points that are being selected
+    FinalPoints_F = []                                # The points that are finalized
+    dij_src_F = None                                  # Strat point of dijstra's algo
+    dij_end_F = None                                  # End point of dijstra's algo
     Weights = None                                  # Weights of all the neighbours for each pixel in the image
+    # Same params wrt the ROI
+    ROI_Frame, ROI_Shape, dij_src_roi, dij_end_roi, ROI_Rect, ROI_Weights = None, None, None, None, None, None
+    RunningPoints_roi = []
 
     IsAborted = False
     while True:
