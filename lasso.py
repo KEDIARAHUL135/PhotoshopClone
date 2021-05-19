@@ -1,5 +1,5 @@
-from typing import Final
 import cv2
+import heapq
 import numpy as np
 
 import helping_functions as hf
@@ -315,11 +315,11 @@ def Dij_SetWeights():
 
     
     # Finding weights
-    BlurredFrame = cv2.blur(CombinedFrame, (3, 3))
+    #CombinedFrame = cv2.blur(CombinedFrame, (3, 3))
     for i in range(9):
         # Applying convolution
         # Temp will be 3 channeled image
-        Temp = cv2.filter2D(BlurredFrame, -1, Kernels[i])
+        Temp = cv2.filter2D(CombinedFrame, -1, Kernels[i])
 
         # Merging the channels to get weights as: B^2 + G^2 + R^2 + 0.01
         # This will ensure that weights are positive and non zero (For Dijsktra's algo)
@@ -330,80 +330,6 @@ def Dij_SetWeights():
         R = 255 - R
         Weights[i] = B*B + G*G + R*R + 0.01
 
-
-
-def FindMinDistPt(Distances, Queue):
-    global ROI_Shape
-
-    minDist = float("Inf")          # Minimum distance point found
-    minDistPt = [-1, -1, -1]   # Index of minimum distance point : [x, y, rowMajor]
-
-    for rm in Queue:
-        x, y = hf.RevertRowMajor(rm, ROI_Shape[1])
-        if Distances[y][x] < minDist:
-            minDist = Distances[y][x]
-            minDistPt = [x, y, rm]
-
-    return minDistPt
-
-
-def UpdateDist_nd_Parent(Pt, Distances, Parent, Queue):
-    global ROI_Weights, ROI_Shape, ROI_Rect
-
-    x, y, rm = Pt
-
-    # Top - Left
-    if x > 0 and y > 0 and hf.ToRowMajor(x-1, y-1, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[0][y-1][x-1] < Distances[y-1][x-1]:
-            Distances[y-1][x-1] = Distances[y][x] + ROI_Weights[0][y-1][x-1]
-            Parent[y-1][x-1] = [x, y]
-    
-    # Top
-    if y > 0 and hf.ToRowMajor(x, y-1, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[1][y-1][x] < Distances[y-1][x]:
-            Distances[y-1][x] = Distances[y][x] + ROI_Weights[0][y-1][x]
-            Parent[y-1][x] = [x, y]
-
-    # Top - Right
-    if x < (ROI_Shape[1] - 1) and y > 0 and hf.ToRowMajor(x+1, y-1, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[2][y-1][x+1] < Distances[y-1][x+1]:
-            Distances[y-1][x+1] = Distances[y][x] + ROI_Weights[0][y-1][x+1]
-            Parent[y-1][x+1] = [x, y]
-    
-    # Left
-    if x > 0 and hf.ToRowMajor(x-1, y, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[3][y][x-1] < Distances[y][x-1]:
-            Distances[y][x-1] = Distances[y][x] + ROI_Weights[0][y][x-1]
-            Parent[y][x-1] = [x, y]
-    
-    # Middle
-    #### No need to consider middle one
-
-    # Right
-    if x < (ROI_Shape[1] - 1) and hf.ToRowMajor(x+1, y, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[5][y][x+1] < Distances[y][x+1]:
-            Distances[y][x+1] = Distances[y][x] + ROI_Weights[0][y][x+1]
-            Parent[y][x+1] = [x, y]
-    
-    # Bottom - Left
-    if x > 0 and y < (ROI_Shape[0] - 1) and hf.ToRowMajor(x-1, y+1, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[6][y+1][x-1] < Distances[y+1][x-1]:
-            Distances[y+1][x-1] = Distances[y][x] + ROI_Weights[0][y+1][x-1]
-            Parent[y+1][x-1] = [x, y]
-    
-    # Bottom
-    if y < (ROI_Shape[0] - 1) and hf.ToRowMajor(x, y+1, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[7][y+1][x] < Distances[y+1][x]:
-            Distances[y+1][x] = Distances[y][x] + ROI_Weights[0][y+1][x]
-            Parent[y+1][x] = [x, y]
-
-    # Bottom - Right
-    if x < (ROI_Shape[1] - 1) and y < (ROI_Shape[0] - 1) and hf.ToRowMajor(x+1, y+1, ROI_Shape[1]) in Queue:
-        if Distances[y][x] + ROI_Weights[8][y+1][x+1] < Distances[y+1][x+1]:
-            Distances[y+1][x+1] = Distances[y][x] + ROI_Weights[0][y+1][x+1]
-            Parent[y+1][x+1] = [x, y]
-    
-    return Distances, Parent
 
 
 def ExtractParentPath(dij_end_roi, Parent):
@@ -453,6 +379,9 @@ def Dij_ShortestPath():
     # Setting ROI for Dijsktra's
     Dij_SetROI()
 
+    # 1 if the node is visited, 0 if the node is not visited
+    IsVisited = np.zeros((ROI_Shape[0], ROI_Shape[1], 1), dtype=bool)
+
     # Distances of the points from source
     Distances = np.ones((ROI_Shape[0], ROI_Shape[1], 1), dtype=np.float32) * 100000000.0
     Distances[dij_src_roi[1]][dij_src_roi[0]] = 0       # Distance of source to source is zero
@@ -461,22 +390,60 @@ def Dij_ShortestPath():
     # [-1, -1] for no parent (source node)
     Parent = [[[-1, -1] for j in range(ROI_Shape[1])] for i in range(ROI_Shape[0])]
 
-    # Adding all points in queue is row major 
-    # [ rowMajor(x, y) = x + y*FrameShape[1] ]
-    # [ x = rowMajor(x, y) % FrameShape[1] ; y = rowMajor(x, y) // FrameShape[1] ]
-    Queue = [i for i in range(ROI_Shape[0] * ROI_Shape[1])]
+
+    # Initializing priority queue
+    PQueue = []
+
+    # Current node
+    [currX, currY] = dij_src_roi
 
     # Finding shortest path for all vertices
-    while Queue:
-        # Getting the index of minimum distance point
-        minDistPt = FindMinDistPt(Distances, Queue)
+    while True:
+        # Setting current node as visited
+        IsVisited[currY][currX] = True
 
-        # Removing min distance point from queue
-        Queue.remove(minDistPt[2])
+        # Loop through all neighbours
+        for i in range(-1, 2, 1):
+            for j in range(-1, 2, 1):
+                # Continue if the neighbour is already visited
+                if IsVisited[currY + i][currX + j]:
+                    continue
 
-        # Updating distance values and parent of the neighbouring points
-        # Consider only those points which are still in Queue
-        Distances, Parent = UpdateDist_nd_Parent(minDistPt, Distances, Parent, Queue)
+                # Finding new and old distances of the newghbour
+                OldDist = Distances[currY + i][currX + j]
+                NewDist = Distances[currY][currX] + Weights[(i+1)*3 + (j+1)][currY][currX]
+
+                # if new distance is lesser than old distance
+                if NewDist < OldDist:
+                    # Updating distance
+                    Distances[currY + i][currX + j] = NewDist
+
+                    # Updating parent of this neighbour is the current point
+                    Parent[currY + i][currX + j] = [currX, currY]
+
+                    # Pushing this neighbour to priority Queue
+                    if not IsVisited[currY + i][currX + j] and \
+                       0 < (currX + j) < (ROI_Shape[1] - 1) and \
+                       0 < (currY + i) < (ROI_Shape[0] - 1):
+                        heapq.heappush(PQueue, (NewDist, currX + j, currY + i))
+
+        #### End of updating neighbours loop
+
+        # Break if priority queue is empty
+        if len(PQueue) == 0:
+            break
+
+        # Finding the minimum distance element in priority queue, 
+        # check if it is visited, 
+        # if not, remove it and update currX&Y
+        minPQEle = heapq.heappop(PQueue)
+        while IsVisited[minPQEle[2]][minPQEle[1]]:
+            try:
+                minPQEle = heapq.heappop(PQueue)
+            except IndexError:
+                break
+
+        currX, currY = minPQEle[1], minPQEle[2]
 
     
     # Getting the shortest path from src to end
