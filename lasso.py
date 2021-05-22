@@ -461,6 +461,15 @@ def DrawPoints(Image, Points, Colour=[127, 127, 127]):
     return Image
 
 
+def DrawPointsOnFrame():
+    global FrameToShow, CombinedFrame, RunningPoints_F, FinalPoints_F
+
+    # Drawing points
+    FrameToShow = CombinedFrame.copy()
+    FrameToShow = DrawPoints(FrameToShow, FinalPoints_F, Colour=[0, 255, 0])
+    FrameToShow = DrawPoints(FrameToShow, RunningPoints_F, Colour=[0, 0, 255])
+
+
 def CvtPointsToContour(Points):
     Contour = []
     for i in range(len(Points)):
@@ -492,8 +501,6 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
             RunningPoints_roi = []
             FinalPoints_F = []
             SelectedContour = []
-            # Call dijsktra's ----- is needed
-            # Dij_ShortestPath()
             
         else:
             if not selecting:
@@ -502,13 +509,11 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
                 RunningPoints_F = []
                 RunningPoints_roi = []
                 FinalPoints_F = []
-                # Call dijsktra's ----- is needed
-                # Dij_ShortestPath()
 
             else:
                 # Add shortest path to final points
-                FinalPoints_F += RunningPoints_F
-                dij_src_F = [x, y]
+                FinalPoints_F += RunningPoints_F[:-15]
+                dij_src_F = RunningPoints_F[-15]#[x, y]
 
     # Selecting the region
     elif event == cv2.EVENT_MOUSEMOVE:
@@ -516,9 +521,7 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
             # Call dijsktra's 
             Dij_ShortestPath()
             # Draw selected and running
-            FrameToShow = CombinedFrame.copy()
-            FrameToShow = DrawPoints(FrameToShow, FinalPoints_F, Colour=[0, 255, 0])
-            FrameToShow = DrawPoints(FrameToShow, RunningPoints_F, Colour=[0, 0, 255])
+            DrawPointsOnFrame()
 
 
     # Stop selecting the layer.
@@ -584,11 +587,18 @@ def MagneticLassoTool(Canvas, window_title):
         cv2.imshow(window_title, FrameToShow)
         Key = cv2.waitKey(1)
 
+        if Key == 8:                        # If Backspace pressed
+            if len(FinalPoints_F) > 1:
+                PoppedEle = FinalPoints_F.pop()
+                dij_src_F = PoppedEle
+                RunningPoints_F.insert(0, PoppedEle)
+                DrawPointsOnFrame()
+                
         if Key == 89 or Key == 121:         # If 'Y'/'y' - confirm
             if isSelected:                  # If the region is selected
                 break
             else:                           # If the region is not selected yet
-                print("Select a region first to confirm.")
+                print("\nSelect a region first to confirm.")
                 continue
         elif Key == 78 or Key == 110:       # If 'N'/'n' - abort
             IsAborted = True
