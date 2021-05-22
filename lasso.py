@@ -258,7 +258,7 @@ def Dij_SetROI():
     global ROI_Frame, ROI_Shape, dij_src_roi, dij_end_roi, ROI_Rect, ROI_Weights
 
     # Getting ROI's bounding rect
-    ExtraROIBoundary = 60
+    ExtraROIBoundary = 10
     ROI_w = abs(dij_src_F[0] - dij_end_F[0]) + (ExtraROIBoundary * 2)
     ROI_h = abs(dij_src_F[1] - dij_end_F[1]) + (ExtraROIBoundary * 2)
     ROI_x = min(dij_src_F[0], dij_end_F[0]) - ExtraROIBoundary
@@ -328,7 +328,7 @@ def Dij_SetWeights():
         B = 255 - B
         G = 255 - G
         R = 255 - R
-        Weights[i] = B*B + G*G + R*R + 0.01
+        Weights[i] = cv2.max(255 - (B*B + G*G + R*R + 0.01), 0)
 
 
 
@@ -361,7 +361,7 @@ def RunningPoints_to_frame(InitialPoints, f_x, f_y):
 
 def Dij_ShortestPath():
     global dij_src_F, dij_end_F, Weights, CanvasShape, RunningPoints_F, \
-            dij_src_roi, dij_end_roi, ROI_Shape, ROI_Rect, RunningPoints_roi
+            dij_src_roi, dij_end_roi, ROI_Shape, ROI_Rect, RunningPoints_roi, ROI_Weights
 
     # If dij_src_F and dij_end_F are neighbours - directly update running points 
     if abs(dij_src_F[0] - dij_end_F[0]) <= 1 and abs(dij_src_F[1] - dij_end_F[1]) <= 1:
@@ -411,7 +411,7 @@ def Dij_ShortestPath():
 
                 # Finding new and old distances of the newghbour
                 OldDist = Distances[currY + i][currX + j]
-                NewDist = Distances[currY][currX] + Weights[(i+1)*3 + (j+1)][currY][currX]
+                NewDist = Distances[currY][currX] + ROI_Weights[(i+1)*3 + (j+1)][currY][currX]
 
                 # if new distance is lesser than old distance
                 if NewDist < OldDist:
@@ -536,7 +536,7 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
         SelectedContour = CvtPointsToContour(FinalPoints_F)
         # Draw contour
         FrameToShow = CombinedFrame.copy()
-        cv2.drawContours(FrameToShow, [np.array(SelectedContour)], -1, (0, 255, 0), 1)#(127, 127, 127), 1)
+        cv2.drawContours(FrameToShow, [np.array(SelectedContour)], -1, (127, 127, 127), 1)
 
 
 def MagneticLassoTool(Canvas, window_title):
