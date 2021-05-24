@@ -3,7 +3,7 @@ import heapq
 import numpy as np
 
 import helping_functions as hf
-from marquee import AskLayerNumsToCopy, CropVisible, ExtractSelectedRegion
+from selectRegionClass import AskLayerNumsToCopy, CropVisible, ExtractSelectedRegion
 
 
 
