@@ -18,25 +18,26 @@ class _RectangularMarqueeToolClass(selectRegionClass._SelectRegion):
         self.X1_, self.Y1_ = 0, 0
         self.X2_, self.Y2_ = 0, 0
 
+    # Defining how to draw the selected region
+    def DrawRegion(self):
+        cv2.rectangle(self.FrameToShow, (self.X1_, self.Y1_), (self.X2_, self.Y2_), (127, 127, 127), 1)
+
     # If left button is pressed
     def Mouse_EVENT_LBUTTONDOWN(self):
         self.X1_, self.Y1_ = self.x, self.y
 
     # If mouse is moved while selecting the region
     def Mouse_EVENT_MOUSEMOVE_selecting(self):
-        self.FrameToShow = self.CombinedFrame.copy()
-        cv2.rectangle(self.FrameToShow, (self.X1_, self.Y1_), (self.x, self.y), (127, 127, 127), 1)
+        self.X2_, self.Y2_ = self.x, self.y
 
     # If mouse left button is released
     def Mouse_EVENT_LBUTTONUP(self):
-        self.FrameToShow = self.CombinedFrame.copy()
-        cv2.rectangle(self.FrameToShow, (self.X1_, self.Y1_), (self.x, self.y), (127, 127, 127), 1)
         self.X2_, self.Y2_ = self.x, self.y
         if self.X1_ == self.X2_ and self.Y1_ == self.Y2_:
             self.isSelected = False
     
     # Inside the while loop if the area is selected
-    def Loop_isSelected(self):
+    def Region_isSelected(self):
         if self.Key == 87 or self.Key == 119:     # If 'W'/'w' - move up
             self.Y1_ -= 1
             self.Y2_ -= 1
@@ -49,9 +50,6 @@ class _RectangularMarqueeToolClass(selectRegionClass._SelectRegion):
         if self.Key == 68 or self.Key == 100:     # If 'D'/'d' - move right
             self.X1_ += 1
             self.X2_ += 1
-        
-        self.FrameToShow = self.CombinedFrame.copy()
-        cv2.rectangle(self.FrameToShow, (self.X1_, self.Y1_), (self.X2_, self.Y2_), (127, 127, 127), 1)
 
     # If the region is selected and confirmed, setting selected region details
     def GetSelectedRegionDetails(self):
@@ -63,7 +61,7 @@ class _RectangularMarqueeToolClass(selectRegionClass._SelectRegion):
 
 def RectangularMarqueeTool(Canvas, window_title):
     ToolObject = _RectangularMarqueeToolClass(Canvas, window_title)
-    ToolObject.RunLoop()
+    ToolObject.RunTool()
     
 
 ###############################################################################################################################################################
@@ -72,14 +70,18 @@ def RectangularMarqueeTool(Canvas, window_title):
 ######################################################## Elliptical Marquee Tool ##############################################################################
 
 class _EllipticalMarqueeToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames, CorrectXYWhileSelecting):
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=False):
         super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting)
         # Initializing the variables for this tool
         # Position of mouse from where ellipse is started selecting
         self.ix, self.iy = 0, 0
         # Selected ellipse's center coordinates and lengths of major and minor axes
-        self.X_, self.Y_, self.A_, self.B_ = 0, 0, 360, 0
+        self.X_, self.Y_, self.A_, self.B_ = 0, 0, 0, 0
 
+    # Draw the selected region
+    def DrawRegion(self):
+        cv2.ellipse(self.FrameToShow, (self.X_, self.Y_), (self.A_, self.B_), 0, 0, 360, (127, 127, 127), 1)
+    
     # Mouse left button is pressed down, set initial points of ellipse
     def Mouse_EVENT_LBUTTONDOWN(self):
         self.ix, self.iy = self.x, self.y
@@ -88,20 +90,16 @@ class _EllipticalMarqueeToolClass(selectRegionClass._SelectRegion):
     def Mouse_EVENT_MOUSEMOVE_selecting(self):
         self.X_, self.Y_ = (self.ix + self.x)//2, (self.iy + self.y)//2
         self.A_, self.B_ = abs(self.ix - self.x)//2, abs(self.iy - self.y)//2
-        self.FrameToShow = self.CombinedFrame.copy()
-        cv2.ellipse(self.FrameToShow, (self.X_, self.Y_), (self.A_, self.B_), 0, 0, 360, (127, 127, 127), 1)
 
     # Mouse left button released, set ellipse data and draw ellipse
-    def Mouse_EVENT_LBUTTONDOWN(self):
+    def Mouse_EVENT_LBUTTONUP(self):
         self.X_, self.Y_ = (self.ix + self.x)//2, (self.iy + self.y)//2
         self.A_, self.B_ = abs(self.ix - self.x)//2, abs(self.iy - self.y)//2
-        self.FrameToShow = self.CombinedFrame.copy()
-        cv2.ellipse(self.FrameToShow, (self.X_, self.Y_), (self.A_, self.B_), 0, 0, 360, (127, 127, 127), 1)
         if self.ix == self.x and self.iy == self.y:
             self.isSelected = False
 
     # If region is selected and being moved
-    def Loop_isSelected(self):
+    def Region_isSelected(self):
         if self.Key == 87 or self.Key == 119:     # If 'W'/'w' - move up
             self.Y_ -= 1
         if self.Key == 65 or self.Key == 97:      # If 'A'/'a' - move left
@@ -111,9 +109,6 @@ class _EllipticalMarqueeToolClass(selectRegionClass._SelectRegion):
         if self.Key == 68 or self.Key == 100:     # If 'D'/'d' - move right
             self.X_ += 1
         
-        self.FrameToShow = self.CombinedFrame.copy()
-        cv2.ellipse(self.FrameToShow, (self.X_, self.Y_), (self.A_, self.B_), 0, 0, 360, (127, 127, 127), 1)
-
     # Getting bounding box and the mask image of the selected region
     def GetSelectedRegionDetails(self):
         # Correcting rectangular's points
@@ -125,7 +120,7 @@ class _EllipticalMarqueeToolClass(selectRegionClass._SelectRegion):
 
 def EllipticalMarqueeTool(Canvas, window_title):
     ToolObject = _EllipticalMarqueeToolClass(Canvas, window_title)
-    ToolObject.RunLoop()
+    ToolObject.RunTool()
     
 
 ###############################################################################################################################################################

@@ -67,15 +67,17 @@ class _SelectRegion:
         elif event == cv2.EVENT_MOUSEMOVE:
             if self.selecting:
                 self.Mouse_EVENT_MOUSEMOVE_selecting()
+                self.SetCanvasFrame()
 
         # Stop selecting the layer.
         elif event == cv2.EVENT_LBUTTONUP:
             self.selecting = False
             self.isSelected = True
             self.Mouse_EVENT_LBUTTONUP()
+            self.SetCanvasFrame()
 
 
-    def RunLoop(self):
+    def RunTool(self):
         self.IsAborted = False
         while True:
             # Showing canvas
@@ -94,7 +96,8 @@ class _SelectRegion:
             
             # If the region is selected, check if the user is trying to move it
             if self.isSelected:
-                self.Loop_isSelected()
+                self.Region_isSelected()
+                self.SetCanvasFrame()
                 
 
         if not self.IsAborted:
@@ -107,6 +110,12 @@ class _SelectRegion:
             print("\nRegion selection aborted.")
 
 
+    def SetCanvasFrame(self):
+        self.FrameToShow = self.CombinedFrame.copy()
+        self.DrawRegion()
+
+    def DrawRegion(self):
+        raise NotImplementedError("Method \"DrawRegion\" is not implemented.")
 
     def Mouse_EVENT_LBUTTONDOWN(self):
         raise NotImplementedError("Method \"Mouse_EVENT_LBUTTONDOWN\" is not implemented.")
@@ -117,8 +126,8 @@ class _SelectRegion:
     def Mouse_EVENT_LBUTTONUP(self):
         raise NotImplementedError("Method \"Mouse_EVENT_LBUTTONUP\" is not implemented.")
         
-    def Loop_isSelected(self):
-        raise NotImplementedError("Method \"Loop_isSelected\" is not implemented.")
+    def Region_isSelected(self):
+        raise NotImplementedError("Method \"Region_isSelected\" is not implemented.")
 
     def GetSelectedRegionDetails(self):
         raise NotImplementedError("Method \"GetSelectedRegionDetails\" is not implemented.")
