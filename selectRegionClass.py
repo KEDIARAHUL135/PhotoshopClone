@@ -96,8 +96,9 @@ class _SelectRegion:
             
             # If the region is selected, check if the user is trying to move it
             if self.isSelected:
-                self.Region_isSelected()
-                self.SetCanvasFrame()
+                if self.Key != -1:      # If some key is pressed
+                    self.Region_isSelected()
+                    self.SetCanvasFrame()
                 
 
         if not self.IsAborted:
