@@ -101,6 +101,9 @@ if __name__ == "__main__":
 
         elif action_str == "LASSO_TOOL":            # Lasso Tool
             input_output.LassoTool(Canvas, window_title)
+        
+        elif action_str == "SELECTION_TOOL":        # Selection Tool
+            input_output.SelectionTool(Canvas, window_title)
 
         elif action_str == "EXIT":                  # Exit code
             break

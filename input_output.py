@@ -4,6 +4,7 @@ import numpy as np
 import lasso
 import image
 import marquee
+import selection
 import helping_functions as hf
 
 
@@ -468,6 +469,41 @@ def LassoTool(Canvas, window_title):
         elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magnetic Lasso Tool
             lasso.MagneticLassoTool(Canvas, window_title)
             break
+        
+        else:                                       # If invalid command is passed.
+            print("Invalid command passed. Enter command again.\n")
+            continue
+        
+    hf.Sleep()
+
+    return
+
+
+def SelectionTool(Canvas, window_title):
+    while True:
+        print()
+        print("Enter 'O' for Object Selection Tool.")
+        print("Enter 'Q' for Quick Selection Tool.")
+        print("Enter 'M' for Magic Wand Tool.")
+
+        command = input("\nEnter command: ")
+        command = command.replace(" ", "")
+
+        if len(command) > 1:                        # If more than 1 command entered.
+            print("Too many commands entered. Enter only one command.\n")
+            continue
+
+        elif 'o' in command or 'O' in command:      # 'o'/'O' entered -> Object Selection Tool
+            selection.ObjectSelectionTool(Canvas, window_title)
+            break
+
+        # elif 'p' in command or 'P' in command:      # 'p'/'P' entered -> Quick Selection Tool
+        #     selection.QuickSelectionTool(Canvas, window_title)
+        #     break
+
+        # elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magic Wand Tool
+        #     selection.MagicWandTool(Canvas, window_title)
+        #     break
         
         else:                                       # If invalid command is passed.
             print("Invalid command passed. Enter command again.\n")

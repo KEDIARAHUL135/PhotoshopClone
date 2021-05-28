@@ -22,3 +22,6 @@ action_statements.append("5  : Marquee Tool")
 
 action.append("LASSO_TOOL")
 action_statements.append("6  : Lasso Tool")
+
+action.append("SELECTION_TOOL")
+action_statements.append("7  : Selection Tool")
