@@ -9,9 +9,9 @@ import helping_functions as hf
 ####################################################### Rectangular Marquee Tool ##############################################################################
 
 class _RectangularMarqueeToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True):
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
         super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
-                         CorrectXYWhileSelecting=CorrectXYWhileSelecting)
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
 
         # Selected rectangle position of top left and bottom right corner
         self.X1_, self.Y1_ = 0, 0
@@ -69,8 +69,9 @@ def RectangularMarqueeTool(Canvas, window_title):
 ######################################################## Elliptical Marquee Tool ##############################################################################
 
 class _EllipticalMarqueeToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=False):
-        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting)
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=False, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
         # Initializing the variables for this tool
         # Position of mouse from where ellipse is started selecting
         self.ix, self.iy = 0, 0
@@ -127,8 +128,9 @@ def EllipticalMarqueeTool(Canvas, window_title):
 ######################################################## Single Row Marquee Tool ##############################################################################
 
 class _SingleRowMarqueeToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True):
-        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting)
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
 
         self.X_ = 0      # Starting point of the row selected
         self.Y_ = 0      # Y-coordinate of the row selected
@@ -178,8 +180,9 @@ def SingleRowMarqueeTool(Canvas, window_title):
 ######################################################## Single Column Marquee Tool ###########################################################################
 
 class _SingleColMarqueeToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True):
-        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting)
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
 
         self.X_ = 0      # Starting point of the row selected
         self.Y_ = 0      # Y-coordinate of the row selected

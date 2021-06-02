@@ -7,7 +7,7 @@ import helping_functions as hf
 
 
 class _SelectRegion:
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True):
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
         hf.Clear()          # Clearing the terminal
         self.Canvas = Canvas
         self.window_title = window_title
@@ -20,8 +20,10 @@ class _SelectRegion:
 
         # Printing help statements common for all selection tools in Photoshop
         print("\nPress 'Y' to confirm selection and copy it in a new layer else press 'N' to abort.")
-        print("You can also used the keys 'W', 'A', 'S', and 'D', to move the")
-        print("selected region Up, Left, Down, and Right respectively.")
+        if RegionMovable:
+            print("You can also used the keys 'W', 'A', 'S', and 'D', to move the")
+            print("selected region Up, Left, Down, and Right respectively.\n")
+        self.PrintInstructions()
 
         # Clearing mouse buffer data (old mouse data) - this is a bug in OpenCV probably
         cv2.namedWindow(self.window_title)
@@ -75,6 +77,9 @@ class _SelectRegion:
             self.isSelected = True
             self.Mouse_EVENT_LBUTTONUP()
             self.SetCanvasFrame()
+
+        else:
+            self.Other_MouseEvents(event)
 
 
     def RunTool(self):
@@ -132,6 +137,12 @@ class _SelectRegion:
 
     def GetSelectedRegionDetails(self):
         raise NotImplementedError("Method \"GetSelectedRegionDetails\" is not implemented.")
+
+    def PrintInstructions(self):
+        pass
+
+    def Other_MouseEvents(self, Event):
+        pass
 
 
 ###########################################################################################################

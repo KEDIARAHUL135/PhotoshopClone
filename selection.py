@@ -8,8 +8,9 @@ import helping_functions as hf
 ############################################################## Object Selection Tool ###########################################################################
 
 class _ObjectSelectionToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True):
-        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting)
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
 
         self.X1, self.Y1 = -1, -1
         self.X2, self.Y2 = -1, -1
@@ -53,7 +54,7 @@ class _ObjectSelectionToolClass(selectRegionClass._SelectRegion):
         # Running Grabcut algorithm
         cv2.grabCut(self.CombinedFrame.copy(), Mask, Rect, bgdModel, fgdModel, ItCount, Mode)
 
-        # Final mask image of foregriund and background
+        # Final mask image of foreground and background
         FgBgMask = np.where((Mask==2) | (Mask==0), 0, 1).astype(np.uint8)
 
         # Detecting contours - there can be more than one regions detected

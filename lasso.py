@@ -11,8 +11,9 @@ from selectRegionClass import AskLayerNumsToCopy, CropVisible, ExtractSelectedRe
 ########################################################### Lasso Tool ################################################################################
 
 class _LassoToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True):
-        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting)
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
 
         self.SelectedContour = []
 
@@ -67,8 +68,9 @@ def LassoTool(Canvas, window_title):
 ########################################################### Polygon Lasso Tool ########################################################################
 
 class _PolygonLassoToolClass(selectRegionClass._SelectRegion):
-    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True):
-        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting)
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
 
         self.Selected_Points = []
 
