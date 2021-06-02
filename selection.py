@@ -120,3 +120,123 @@ def ObjectSelectionTool(Canvas, window_title):
     ToolObject = _ObjectSelectionToolClass(Canvas, window_title)
     ToolObject.RunTool()
 
+
+################################################################################################################################################################
+
+
+############################################################### Quick Selection Tool ###########################################################################
+
+class _QuickSelectionToolClass(selectRegionClass._SelectRegion):
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, 
+                         CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
+
+        # All pixels = 4 for unknown area
+        self.RegionMask = np.ones((self.CanvasShape[0], self.CanvasShape[1], 1), dtype=np.uint8) * cv2.GC_PR_BGD
+        self.RegionMask_GC_Output = self.RegionMask.copy()
+
+        # Which mouse button is being used (0 : Left Button, 1 : Right Button)
+        self.MouseButton = 0
+
+
+    # Drawing selected regions on the canvas
+    def DrawRegion(self):
+        Mask = np.zeros(self.RegionMask_GC_Output.shape, dtype=np.uint8)
+        Mask[(self.RegionMask_GC_Output==cv2.GC_FGD) | (self.RegionMask_GC_Output==cv2.GC_PR_FGD)] = 255
+        Contours = cv2.findContours(Mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)[-2]
+        cv2.drawContours(self.FrameToShow, Contours, -1, (127, 127, 127), 1)
+
+    # printing extra instructions
+    def PrintInstructions(self):
+        print("Click/ Press and Hold mouse left button to Add Selection.")
+        print("Click/ Press and Hold mouse right button to Subtract Selection.")
+        print("Double click mouse left button to Start a New Selection.")
+        print()
+
+
+    def SetRegionMask_Selecting(self):
+        SelectedPointRadius = 2
+        if self.MouseButton == 0:       # Left button for foreground
+            # self.RegionMask_GC_Output[self.y][self.x] = cv2.GC_FGD
+            cv2.circle(self.RegionMask_GC_Output, (self.x, self.y), SelectedPointRadius, cv2.GC_FGD, -1)
+        else:                           # Right button for background
+            # self.RegionMask_GC_Output[self.y][self.x] = cv2.GC_BGD
+            cv2.circle(self.RegionMask_GC_Output, (self.x, self.y), SelectedPointRadius, cv2.GC_BGD, -1)
+
+
+    # Redefining callback method
+    def CallBackFunc(self, event, x, y, flags, params):
+        # If while selecting the region, mouse goes out of the frame, then clip it position 
+        # to the nearest corner/edge of the frame
+        if self.selecting and self.CorrectXYWhileSelecting:
+            x, y = hf.Correct_xy_While_Selecting(x, y, [0, self.CanvasShape[1]-1], [0, self.CanvasShape[0]-1])
+
+        # Storing mouse pointer values to self variable for access outside the function
+        self.x, self.y = x, y
+
+        # Starts selecting - Left button is pressed down
+        if event == cv2.EVENT_LBUTTONDOWN or event == cv2.EVENT_RBUTTONDOWN:
+            self.selecting = True
+            self.isSelected = False
+            if event == cv2.EVENT_LBUTTONDOWN:
+                self.MouseButton = 0
+            else:
+                self.MouseButton = 1
+            self.SetRegionMask_Selecting()
+            self.ApplyGrabcut(ItCount=1)
+            self.SetCanvasFrame()
+
+        # Selecting the region
+        elif event == cv2.EVENT_MOUSEMOVE:
+            if self.selecting:
+                self.SetRegionMask_Selecting()
+                self.ApplyGrabcut(ItCount=1)
+                self.SetCanvasFrame()
+
+        # Stop selecting the layer.
+        elif event == cv2.EVENT_LBUTTONUP or event == cv2.EVENT_RBUTTONUP:
+            self.selecting = False
+            self.isSelected = True
+            self.RegionMask = self.RegionMask_GC_Output.copy()
+            # self.RegionMask[self.RegionMask==cv2.GC_PR_BGD] = cv2.GC_BGD
+            self.RegionMask[self.RegionMask==cv2.GC_PR_FGD] = cv2.GC_FGD
+            self.RegionMask_GC_Output = self.RegionMask.copy()
+            self.SetCanvasFrame()
+
+        # Reset region masks
+        elif event == cv2.EVENT_LBUTTONDBLCLK:
+            self.selecting = False
+            self.isSelected = False
+            self.RegionMask = np.ones((self.CanvasShape[0], self.CanvasShape[1], 1), dtype=np.uint8) * cv2.GC_PR_BGD
+            self.RegionMask_GC_Output = self.RegionMask.copy()
+
+
+    # Applying grabcut
+    def ApplyGrabcut(self, ItCount=5, Mode=cv2.GC_INIT_WITH_MASK):
+        # bgdModel & fgdModel variables to be passed
+        bgdModel = np.zeros((1, 65), dtype=np.float64)
+        fgdModel = np.zeros((1, 65), dtype=np.float64)
+
+        # Running Grabcut algorithm
+        GC_Output, bgdModel, fgdModel = cv2.grabCut(self.CombinedFrame, self.RegionMask_GC_Output.copy(), None, bgdModel, fgdModel, ItCount, Mode)
+    
+        # Getting the foreground part connected to mouse pointer position only and adding it
+        # Foreground found is black and background is white for applying floodfill
+        FGD_Mask = np.ones(GC_Output.shape, dtype=np.uint8) * 255
+        FGD_Mask[(GC_Output==cv2.GC_FGD) | (GC_Output==cv2.GC_PR_FGD)] = 0
+        mask = np.zeros((FGD_Mask.shape[0] + 2, FGD_Mask.shape[1] + 2), dtype=np.uint8)
+        cv2.floodFill(FGD_Mask, mask, (self.x, self.y), 127)
+        self.RegionMask_GC_Output[FGD_Mask==127] = cv2.GC_FGD
+
+    # Getting selected region BB and mask
+    def GetSelectedRegionDetails(self):
+        self.Selected_Mask = np.zeros(self.RegionMask_GC_Output.shape, dtype=np.uint8)
+        self.Selected_Mask[(self.RegionMask==cv2.GC_FGD) | (self.RegionMask==cv2.GC_PR_FGD)] = 255
+        self.Selected_BB = [0, 0, self.CanvasShape[1], self.CanvasShape[0]]
+
+    
+
+def QuickSelectionTool(Canvas, window_title):
+    ToolObject = _QuickSelectionToolClass(Canvas, window_title, RegionMovable=False)
+    ToolObject.RunTool()
+    

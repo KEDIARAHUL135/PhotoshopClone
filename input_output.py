@@ -497,9 +497,9 @@ def SelectionTool(Canvas, window_title):
             selection.ObjectSelectionTool(Canvas, window_title)
             break
 
-        # elif 'p' in command or 'P' in command:      # 'p'/'P' entered -> Quick Selection Tool
-        #     selection.QuickSelectionTool(Canvas, window_title)
-        #     break
+        elif 'q' in command or 'Q' in command:      # 'q'/'Q' entered -> Quick Selection Tool
+            selection.QuickSelectionTool(Canvas, window_title)
+            break
 
         # elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magic Wand Tool
         #     selection.MagicWandTool(Canvas, window_title)
