@@ -11,6 +11,7 @@ class _SelectRegion:
         hf.Clear()          # Clearing the terminal
         self.Canvas = Canvas
         self.window_title = window_title
+        self.RegionMovable = RegionMovable
 
         # Asking layer numbers if prompted
         if AskLayerNames:
@@ -20,7 +21,7 @@ class _SelectRegion:
 
         # Printing help statements common for all selection tools in Photoshop
         print("\nPress 'Y' to confirm selection and copy it in a new layer else press 'N' to abort.")
-        if RegionMovable:
+        if self.RegionMovable:
             print("You can also used the keys 'W', 'A', 'S', and 'D', to move the")
             print("selected region Up, Left, Down, and Right respectively.\n")
         self.PrintInstructions()
@@ -98,9 +99,11 @@ class _SelectRegion:
             elif self.Key == 78 or self.Key == 110:       # If 'N'/'n' - abort
                 self.IsAborted = True
                 break
+            else:
+                self.KeyPressedInMainLoop()
             
             # If the region is selected, check if the user is trying to move it
-            if self.isSelected:
+            if self.isSelected and self.RegionMovable:
                 if self.Key != -1:      # If some key is pressed
                     self.Region_isSelected()
                     self.SetCanvasFrame()
@@ -142,6 +145,9 @@ class _SelectRegion:
         pass
 
     def Other_MouseEvents(self, Event):
+        pass
+
+    def KeyPressedInMainLoop(self):
         pass
 
 

@@ -501,9 +501,9 @@ def SelectionTool(Canvas, window_title):
             selection.QuickSelectionTool(Canvas, window_title)
             break
 
-        # elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magic Wand Tool
-        #     selection.MagicWandTool(Canvas, window_title)
-        #     break
+        elif 'm' in command or 'M' in command:      # 'm'/'M' entered -> Magic Wand Tool
+            selection.MagicWandTool(Canvas, window_title)
+            break
         
         else:                                       # If invalid command is passed.
             print("Invalid command passed. Enter command again.\n")

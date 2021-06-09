@@ -223,4 +223,72 @@ class _QuickSelectionToolClass(selectRegionClass._SelectRegion):
 def QuickSelectionTool(Canvas, window_title):
     ToolObject = _QuickSelectionToolClass(Canvas, window_title, RegionMovable=False)
     ToolObject.RunTool()
-    
+
+
+################################################################################################################################################################
+
+
+############################################################### Magic Wand Tool ################################################################################
+
+class _MagicWandToolClass(selectRegionClass._SelectRegion):
+    def __init__(self, Canvas, window_title, AskLayerNames=True, CorrectXYWhileSelecting=True, RegionMovable=True):
+        super().__init__(Canvas, window_title, AskLayerNames=AskLayerNames, CorrectXYWhileSelecting=CorrectXYWhileSelecting, RegionMovable=RegionMovable)
+
+        # Tolerance value to be used
+        self.Tolerance = 32
+        # Seed point coordinates
+        self.seed = None
+        # Mask image of the selected region
+        self.Mask = np.zeros((self.CanvasShape[0], self.CanvasShape[1], 1), dtype=np.uint8)
+        # Image to be worked on
+        self.WorkingImage = cv2.edgePreservingFilter(self.CombinedFrame.copy(), flags=1, sigma_s=11, sigma_r=0.2)
+        self.WorkingImage = cv2.cvtColor(self.WorkingImage, cv2.COLOR_BGR2GRAY)
+
+    # Printing instructions for setting tolerance value
+    def PrintInstructions(self):
+        print("Press 'T' to change Tolerance value (default is 32).")
+
+    def DrawRegion(self):
+        if not self.selecting:      # Don't draw if selecting
+            Contours= cv2.findContours(self.Mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[-2]
+            cv2.drawContours(self.FrameToShow, Contours, -1, (127, 127, 127), 1)
+
+    def KeyPressedInMainLoop(self):
+        if self.Key == 84 or self.Key == 116:   # If 'T'/'t' pressed
+            print("\nCurrent value of Tolerance: {}".format(self.Tolerance))
+            while True:
+                try:
+                    self.Tolerance = abs(int(input("Enter new value (between [0-255]): ")))
+                    break
+                except:
+                    print("Invalid value entered.")
+            print("New value of Tolerance: {}".format(self.Tolerance))
+
+    def Mouse_EVENT_LBUTTONDOWN(self):
+        # Setting seed point
+        self.seed = [self.x, self.y]
+        # Resetting mask image
+        self.Mask = np.zeros((self.CanvasShape[0], self.CanvasShape[1], 1), dtype=np.uint8)
+
+    def Mouse_EVENT_MOUSEMOVE_selecting(self):
+        pass
+
+    def Mouse_EVENT_LBUTTONUP(self):
+        self.Floodfill()
+
+    def Floodfill(self):
+        mask = np.zeros((self.CanvasShape[0]+2, self.CanvasShape[1]+2), dtype=np.uint8)
+        _, Image, _, Rect = cv2.floodFill(self.WorkingImage.copy(), mask, tuple(self.seed), 255,
+                                          self.Tolerance//2, self.Tolerance//2, cv2.FLOODFILL_FIXED_RANGE)
+        self.Mask[Rect[1]:Rect[1]+Rect[3], Rect[0]:Rect[0]+Rect[2]][Image[Rect[1]:Rect[1]+Rect[3], Rect[0]:Rect[0]+Rect[2]] == 255] = 255 
+
+    def GetSelectedRegionDetails(self):
+        self.Selected_BB = [0, 0, self.CanvasShape[1], self.CanvasShape[0]]
+        self.Selected_Mask = self.Mask
+        
+
+def MagicWandTool(Canvas, window_title):
+    ToolObject = _MagicWandToolClass(Canvas, window_title, RegionMovable=False)
+    ToolObject.RunTool()
+
+################################################################################################################################################################
