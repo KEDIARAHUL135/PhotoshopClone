@@ -17,7 +17,11 @@ class _SelectRegion:
         if AskLayerNames:
             # Taking layer numbers user wants to copy
             self.Canvas.PrintLayerNames()
-            self.layer_nos_to_copy = AskLayerNumsToCopy(-1, len(self.Canvas.layers) - 1)
+            if len(self.Canvas.layers) <= 1:
+                self.layer_nos_to_copy = [-1]
+                print("\nThe tool will copy the only layer present.")    
+            else:
+                self.layer_nos_to_copy = AskLayerNumsToCopy(-1, len(self.Canvas.layers) - 1)
 
         # Printing help statements common for all selection tools in Photoshop
         print("\nPress 'Y' to confirm selection and copy it in a new layer else press 'N' to abort.")
