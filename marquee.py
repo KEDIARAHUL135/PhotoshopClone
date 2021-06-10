@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+import drawing
 import selectRegionClass
 import helping_functions as hf
 
@@ -19,7 +20,7 @@ class _RectangularMarqueeToolClass(selectRegionClass._SelectRegion):
 
     # Defining how to draw the selected region
     def DrawRegion(self):
-        cv2.rectangle(self.FrameToShow, (self.X1_, self.Y1_), (self.X2_, self.Y2_), (127, 127, 127), 1)
+        drawing.Rectangle(self.FrameToShow, [self.X1_, self.Y1_], [self.X2_, self.Y2_])
 
     # If left button is pressed
     def Mouse_EVENT_LBUTTONDOWN(self):
