@@ -72,3 +72,24 @@ def Rectangle(Image, Pt1, Pt2):
     Line(Image, [x2, y1], [x2, y2], VerticalOrientation)
     Line(Image, [x2, y2], [x1, y2], HorizontalOrientation)
     Line(Image, [x1, y2], [x1, y1], VerticalOrientation)
+
+
+#####################################################################################################
+
+# Drawing ellipse
+def Ellipse(Image, Center, Axes, Angle, startAngle, endAngle):
+    if Axes[0] == 0 and Axes[1] == 0:
+        return
+
+    theta = int(np.round(np.degrees(((2 * Len) / (Axes[0] + Axes[1])))))
+
+    PartAngles = [i for i in range(0, 360+theta+1, theta)]
+
+    isWhite = True
+    for i in range(1, len(PartAngles)):
+        if isWhite:
+            cv2.ellipse(Image, Center, Axes, Angle, PartAngles[i-1], PartAngles[i], (255, )*Image.shape[-1], 1)
+            isWhite = False
+        else:
+            cv2.ellipse(Image, Center, Axes, Angle, PartAngles[i-1], PartAngles[i], (0, )*Image.shape[-1], 1)
+            isWhite = True

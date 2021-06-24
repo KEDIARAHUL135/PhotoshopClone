@@ -81,7 +81,7 @@ class _EllipticalMarqueeToolClass(selectRegionClass._SelectRegion):
 
     # Draw the selected region
     def DrawRegion(self):
-        cv2.ellipse(self.FrameToShow, (self.X_, self.Y_), (self.A_, self.B_), 0, 0, 360, (127, 127, 127), 1)
+        drawing.Ellipse(self.FrameToShow, (self.X_, self.Y_), (self.A_, self.B_), 0, 0, 360)
     
     # Mouse left button is pressed down, set initial points of ellipse
     def Mouse_EVENT_LBUTTONDOWN(self):
