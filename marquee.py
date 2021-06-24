@@ -138,7 +138,7 @@ class _SingleRowMarqueeToolClass(selectRegionClass._SelectRegion):
 
     # Drawing selected line
     def DrawRegion(self):
-        cv2.line(self.FrameToShow, (self.X_, self.Y_), (self.X_ + self.CanvasShape[1]-1, self.Y_), (127, 127, 127), 1)
+        drawing.HorLine(self.FrameToShow, self.X_, self.X_ + self.CanvasShape[1]-1, self.Y_)
 
     # Mouse left button is pressed down
     def Mouse_EVENT_LBUTTONDOWN(self):
@@ -190,7 +190,7 @@ class _SingleColMarqueeToolClass(selectRegionClass._SelectRegion):
 
     # Drawing selected line
     def DrawRegion(self):
-        cv2.line(self.FrameToShow, (self.X_, self.Y_), (self.X_, self.Y_ + self.CanvasShape[0]-1), (127, 127, 127), 1)
+        drawing.VerLine(self.FrameToShow, self.X_, self.Y_, self.Y_ + self.CanvasShape[0]-1)
 
     # Mouse left button is pressed down
     def Mouse_EVENT_LBUTTONDOWN(self):

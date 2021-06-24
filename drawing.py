@@ -7,6 +7,10 @@ VerticalOrientation = -2
 
 # Drawing horizontal line
 def HorLine(Image, x1, x2, y):
+    if x1 > x2: 
+        x1, x2 = x2, x1
+    x1, x2 = max(0, x1), min(x2, Image.shape[1]-1)
+
     Last_x = x1
     isWhite = True
     for x in range(x1 + Len, x2 + 1, Len):
@@ -27,6 +31,10 @@ def HorLine(Image, x1, x2, y):
 
 # Drawing verticle line
 def VerLine(Image, x, y1, y2):
+    if y1 > y2: 
+        y1, y2 = y2, y1
+    y1, y2 = max(0, y1), min(y2, Image.shape[0]-1)
+    
     Last_y = y1
     isWhite = True
     for y in range(y1 + Len, y2 + 1, Len):
