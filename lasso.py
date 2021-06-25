@@ -373,14 +373,6 @@ def DrawPointsOnFrame():
     FrameToShow = DrawPoints(FrameToShow, RunningPoints_F, Colour=[0, 0, 255])
 
 
-def CvtPointsToContour(Points):
-    Contour = []
-    for i in range(len(Points)):
-        Contour.append([[Points[i][0], Points[i][1]]])
-
-    return Contour
-
-
 def CallBackFunc_MagLassoTool(event, x, y, flags, params):
     # Taking global params
     global selecting, isSelected, CombinedFrame, FrameToShow, CanvasShape, SelectedContour, \
@@ -439,7 +431,7 @@ def CallBackFunc_MagLassoTool(event, x, y, flags, params):
         # Add last running points to final points
         FinalPoints_F += RunningPoints_F
         # Convert finalPoints to Selected Contour
-        SelectedContour = CvtPointsToContour(FinalPoints_F)
+        SelectedContour = FinalPoints_F.copy()
         # Draw contour
         FrameToShow = CombinedFrame.copy()
         cv2.drawContours(FrameToShow, [np.array(SelectedContour)], -1, (127, 127, 127), 1)
@@ -519,7 +511,7 @@ def MagneticLassoTool(Canvas, window_title):
                 SelectedContour = hf.ShiftContour(SelectedContour, ToOrigin=False, ShiftBy=[1, 0])
             
             FrameToShow = CombinedFrame.copy()
-            cv2.drawContours(FrameToShow, [np.array(SelectedContour)], -1, (127, 127, 127), 1)
+            drawing.Com_Contours(FrameToShow, [SelectedContour])
             
 
     if not IsAborted:
