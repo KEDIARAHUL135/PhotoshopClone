@@ -2,6 +2,7 @@ import cv2
 import heapq
 import numpy as np
 
+import drawing
 import selectRegionClass
 import helping_functions as hf
 from selectRegionClass import AskLayerNumsToCopy, CropVisible, ExtractSelectedRegion
@@ -19,16 +20,20 @@ class _LassoToolClass(selectRegionClass._SelectRegion):
 
     # How to draw the region
     def DrawRegion(self):
-        cv2.drawContours(self.FrameToShow, [np.array(self.SelectedContour)], -1, (127, 127, 127), 1)
+        if not self.isSelected:
+            drawing.Inc_Contour(self.FrameToShow, self.SelectedContour)
+        else:
+            drawing.Com_Contours(self.FrameToShow, [self.SelectedContour])
+
     
     # When moue left button is pressed down
     def Mouse_EVENT_LBUTTONDOWN(self):
         self.SelectedContour = []
-        self.SelectedContour.append([[self.x, self.y]])
+        self.SelectedContour.append([self.x, self.y])
 
     # When mouse is moved while selecting
     def Mouse_EVENT_MOUSEMOVE_selecting(self):
-        self.SelectedContour.append([[self.x, self.y]])
+        self.SelectedContour.append([self.x, self.y])
         
     # When mouse left button is released - check if something is selected
     def Mouse_EVENT_LBUTTONUP(self):

@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+import helping_functions as hf
+
+
 Len = 6
 HorizontalOrientation = -1
 VerticalOrientation = -2
@@ -101,3 +104,45 @@ def Ellipse(Image, Center, Axes, Angle, startAngle, endAngle):
         else:
             cv2.ellipse(Image, Center, Axes, Angle, PartAngles[i-1], PartAngles[i], (0, )*Image.shape[-1], 1)
             isWhite = True
+
+#####################################################################################################
+
+def Inc_Contour(Image, Contour):
+    # Looping over all points
+    for i in range(1, len(Contour)):
+        # Extracting the grayscale colour of the point
+        ColourVal = Image[Contour[i][1]][Contour[i][0]]
+
+        if ColourVal[0] <= 127 and ColourVal[1] <= 127 and ColourVal[2] <= 127:
+            cv2.line(Image, tuple(Contour[i]), tuple(Contour[i-1]), (255, 255, 255), 1)
+
+        else:
+            cv2.line(Image, tuple(Contour[i]), tuple(Contour[i-1]), (0, 0, 0), 1)
+            
+
+def Com_Contours(Image, Contours):
+    for Contour in Contours:
+        Sum = 0
+        isWhite = True
+
+        for i in range(1, len(Contour)):
+            x1, y1 = Contour[i-1]
+            x2, y2 = Contour[i]
+
+            dist = hf.Distance([x1, y1], [x2, y2])
+
+            if isWhite:
+                cv2.line(Image, (x1, y1), (x2, y2), (255, 255, 255), 1)
+            else:
+                cv2.line(Image, (x1, y1), (x2, y2), (0, 0, 0), 1)
+
+            Sum += dist
+            if Sum > Len:
+                isWhite = not isWhite
+                Sum = 0
+            
+        # Joining the first and last points
+        x1, y1 = Contour[0]
+        x2, y2 = Contour[-1]
+
+        cv2.line(Image, (x1, y1), (x2, y2), (255, 255, 255), 1)

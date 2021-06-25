@@ -1,5 +1,6 @@
 import os
 import cv2
+import math
 import time
 import numpy as np
 
@@ -157,3 +158,7 @@ def RevertRowMajor(RowMajor, NumOfCols):
     y = RowMajor // NumOfCols
 
     return x, y
+
+
+def Distance(pt1, pt2):
+    return math.sqrt( ((pt2[1] - pt1[1]) ** 2) + ((pt2[0] - pt1[0]) ** 2) )
