@@ -134,7 +134,10 @@ def ShiftContour(Contour, ToOrigin=True, ShiftBy=[0, 0], Get_Mask_BB=False):
     # Shifting the contour
     ShiftedContour = []
     for i in range(len(Contour)):
-        ShiftedContour.append([[(Contour[i][0][0] + ShiftBy[0]), (Contour[i][0][1] + ShiftBy[1])]])
+        try:
+            ShiftedContour.append([(Contour[i][0] + ShiftBy[0]), (Contour[i][1] + ShiftBy[1])])
+        except:
+            ShiftedContour.append([[(Contour[i][0][0] + ShiftBy[0]), (Contour[i][0][1] + ShiftBy[1])]])
 
 
     # If bounding box and mask image are asked
