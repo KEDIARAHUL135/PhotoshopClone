@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+import drawing
 import selectRegionClass
 import helping_functions as hf
 
@@ -20,9 +21,11 @@ class _ObjectSelectionToolClass(selectRegionClass._SelectRegion):
     # How to draw the selected region
     def DrawRegion(self):
         if self.selecting:
-            cv2.drawContours(self.FrameToShow, np.array(self.SelectedContours), -1, (127, 127, 127), 1)
+            drawing.Rectangle(self.FrameToShow, self.SelectedContours[0][0], self.SelectedContours[0][2])
+            # cv2.drawContours(self.FrameToShow, np.array(self.SelectedContours), -1, (127, 127, 127), 1)
         else:
-            cv2.drawContours(self.FrameToShow, self.SelectedContours, -1, (127, 127, 127), 1)
+            drawing.Com_Contours(self.FrameToShow, self.SelectedContours)
+            # cv2.drawContours(self.FrameToShow, self.SelectedContours, -1, (127, 127, 127), 1)
 
     # When mouse left button is pressed
     def Mouse_EVENT_LBUTTONDOWN(self):
@@ -34,10 +37,10 @@ class _ObjectSelectionToolClass(selectRegionClass._SelectRegion):
     def Mouse_EVENT_MOUSEMOVE_selecting(self):
         self.X2, self.Y2 = self.x, self.y
         # Converting this selecting rectangle to selected contour for now for visualization
-        self.SelectedContours = [ np.asarray([[[self.X1, self.Y1]], 
-                                              [[self.X2, self.Y1]],
-                                              [[self.X2, self.Y2]],
-                                              [[self.X1, self.Y2]]]) ]
+        self.SelectedContours = [ np.asarray([[self.X1, self.Y1], 
+                                              [self.X2, self.Y1],
+                                              [self.X2, self.Y2],
+                                              [self.X1, self.Y2]]) ]
 
     # Grabcut algorithm
     def ApplyGrabcut(self, ItCount=5, Mode=cv2.GC_INIT_WITH_RECT):
@@ -58,7 +61,9 @@ class _ObjectSelectionToolClass(selectRegionClass._SelectRegion):
         FgBgMask = np.where((Mask==2) | (Mask==0), 0, 1).astype(np.uint8)
 
         # Detecting contours - there can be more than one regions detected
-        self.SelectedContours = cv2.findContours(FgBgMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
+        Contours = cv2.findContours(FgBgMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
+        self.SelectedContours = hf.RemoveContoursDim(Contours)
+
     
     # When mouse left button is released
     def Mouse_EVENT_LBUTTONUP(self):

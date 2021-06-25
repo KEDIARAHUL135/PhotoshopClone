@@ -165,3 +165,16 @@ def RevertRowMajor(RowMajor, NumOfCols):
 
 def Distance(pt1, pt2):
     return math.sqrt( ((pt2[1] - pt1[1]) ** 2) + ((pt2[0] - pt1[0]) ** 2) )
+
+
+def RemoveContoursDim(Contours):
+    ReducedContours = []
+
+    for Contour in Contours:
+        ReducedContour = []
+        for i in range(len(Contour)):
+            ReducedContour.append([Contour[i][0][0], Contour[i][0][1]])
+        
+        ReducedContours.append(ReducedContour)
+    
+    return ReducedContours
