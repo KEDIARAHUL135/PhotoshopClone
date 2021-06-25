@@ -56,17 +56,63 @@ def VerLine(Image, x, y1, y2):
         Image[Last_y : y2 + 1, x, :] = 0
 
 
+def GetLinePoints(Pt1, Pt2):
+    [x, y] = Pt1
+
+    dist = hf.Distance(Pt1, Pt2)
+    dx = (Pt2[0] - Pt1[0]) / (3 * dist)
+    dy = (Pt2[1] - Pt1[1]) / (3 * dist)
+
+    Points = [[x, y]]
+    while min(Pt1[0], Pt2[0]) <= x <= max(Pt1[0], Pt2[0]) and min(Pt1[1], Pt2[1]) <= y <= max(Pt1[1], Pt2[1]):
+        x += dx
+        y += dy
+        Pt = [int(x), int(y)]
+
+        if Pt != Points[-1]:
+            Points.append(Pt)
+    
+    return Points
+
+
+# Drawing a line at some angle except 0 or 90.
+def LineAtAngle(Image, Pt1, Pt2):
+    # Getting the line points
+    Points = GetLinePoints(Pt1, Pt2)
+
+    # Drawing dashed line
+    isWhite = True
+    for i in range(0, len(Points), Len):
+        for j in range(i, Len+i):
+            try:    # Index out of range error for j = len(Points)
+                if isWhite:
+                    Image[Points[j][1]][Points[j][0]] = [255, 255, 255]
+                else:
+                    Image[Points[j][1]][Points[j][0]] = [0, 0, 0]
+            except:
+                pass
+        
+        # Switching colour
+        isWhite = not isWhite
+
+
 # Drawing line (currently only horizontal and verticle lines are supported)
-def Line(Image, Pt1, Pt2, Orientation):
+def Line(Image, Pt1, Pt2, Orientation=0):
+    # Horizontal Line
     if Orientation == HorizontalOrientation:
         if Pt1[0] > Pt2[0]:
             Pt1[0], Pt2[0] = Pt2[0], Pt1[0]
         HorLine(Image, min(Pt1[0], Pt2[0]), max(Pt1[0], Pt2[0]), Pt1[1])
     
+    # Vertical Line
     elif Orientation == VerticalOrientation:
         if Pt1[1] > Pt2[1]:
             Pt1[1], Pt2[1] = Pt2[1], Pt1[1]
         VerLine(Image, Pt1[0], min(Pt1[1], Pt2[1]), max(Pt1[1], Pt2[1]))
+
+    # Line at angle
+    else:
+        LineAtAngle(Image, Pt1, Pt2)
         
 
 # Drawing normal rectangle (sides parallel to axes)
@@ -145,4 +191,4 @@ def Com_Contours(Image, Contours):
         x1, y1 = Contour[0]
         x2, y2 = Contour[-1]
 
-        cv2.line(Image, (x1, y1), (x2, y2), (255, 255, 255), 1)
+        LineAtAngle(Image, [x1, y1], [x2, y2])
