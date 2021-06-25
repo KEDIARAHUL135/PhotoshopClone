@@ -60,6 +60,10 @@ def GetLinePoints(Pt1, Pt2):
     [x, y] = Pt1
 
     dist = hf.Distance(Pt1, Pt2)
+    
+    if dist == 0:
+        return []
+        
     dx = (Pt2[0] - Pt1[0]) / (3 * dist)
     dy = (Pt2[1] - Pt1[1]) / (3 * dist)
 
@@ -76,24 +80,35 @@ def GetLinePoints(Pt1, Pt2):
 
 
 # Drawing a line at some angle except 0 or 90.
-def LineAtAngle(Image, Pt1, Pt2):
+def LineAtAngle(Image, Pt1, Pt2, isDashed):
     # Getting the line points
     Points = GetLinePoints(Pt1, Pt2)
 
-    # Drawing dashed line
-    isWhite = True
-    for i in range(0, len(Points), Len):
-        for j in range(i, Len+i):
-            try:    # Index out of range error for j = len(Points)
-                if isWhite:
-                    Image[Points[j][1]][Points[j][0]] = [255, 255, 255]
-                else:
-                    Image[Points[j][1]][Points[j][0]] = [0, 0, 0]
-            except:
-                pass
-        
-        # Switching colour
-        isWhite = not isWhite
+    if isDashed:
+        # Drawing dashed line
+        isWhite = True
+        for i in range(0, len(Points), Len):
+            for j in range(i, Len+i):
+                try:    # Index out of range error for j = len(Points)
+                    if isWhite:
+                        Image[Points[j][1]][Points[j][0]] = [255, 255, 255]
+                    else:
+                        Image[Points[j][1]][Points[j][0]] = [0, 0, 0]
+                except:
+                    pass
+            
+            # Switching colour
+            isWhite = not isWhite
+
+    else:
+        for Pt in Points:
+            ColourVal = Image[Pt[1]][Pt[0]]
+
+            if ColourVal[0] <= 127 and ColourVal[1] <= 127 and ColourVal[2] <= 127:
+                Image[Pt[1]][Pt[0]] = [255, 255, 255]
+            else:
+                Image[Pt[1]][Pt[0]] = [0, 0, 0]
+
 
 
 # Drawing line (currently only horizontal and verticle lines are supported)
@@ -112,7 +127,7 @@ def Line(Image, Pt1, Pt2, Orientation=0):
 
     # Line at angle
     else:
-        LineAtAngle(Image, Pt1, Pt2)
+        LineAtAngle(Image, Pt1, Pt2, True)
         
 
 # Drawing normal rectangle (sides parallel to axes)
@@ -191,4 +206,4 @@ def Com_Contours(Image, Contours):
         x1, y1 = Contour[0]
         x2, y2 = Contour[-1]
 
-        LineAtAngle(Image, [x1, y1], [x2, y2])
+        LineAtAngle(Image, [x1, y1], [x2, y2], True)

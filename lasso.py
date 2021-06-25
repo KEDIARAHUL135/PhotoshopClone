@@ -83,10 +83,12 @@ class _PolygonLassoToolClass(selectRegionClass._SelectRegion):
     def DrawRegion(self):
         if self.selecting:
             for i in range(len(self.Selected_Points)-1):
-                cv2.line(self.FrameToShow, tuple(self.Selected_Points[i][0]), tuple(self.Selected_Points[i+1][0]), (127, 127, 127), 1)
-            cv2.line(self.FrameToShow, tuple(self.Selected_Points[-1][0]), (self.x, self.y), (127, 127, 127), 1)
+                drawing.LineAtAngle(self.FrameToShow, self.Selected_Points[i], self.Selected_Points[i+1], False)
+            drawing.LineAtAngle(self.FrameToShow, self.Selected_Points[-1], [self.x, self.y], False)
+        
         elif self.isSelected:
-            cv2.drawContours(self.FrameToShow, [np.array(self.Selected_Points)], -1, (127, 127, 127), 1)
+            for i in range(len(self.Selected_Points)):
+                drawing.LineAtAngle(self.FrameToShow, self.Selected_Points[i], self.Selected_Points[i-1], True)
 
     # Callback function will be fully modified
     def CallBackFunc(self, event, x, y, flags, params):
@@ -104,7 +106,7 @@ class _PolygonLassoToolClass(selectRegionClass._SelectRegion):
             if self.isSelected:     # If already selected, start drawing a new one
                 self.isSelected = False
                 self.Selected_Points = []
-            self.Selected_Points.append([[x, y]])
+            self.Selected_Points.append([x, y])
             
         # Selecting the region
         elif event == cv2.EVENT_MOUSEMOVE:
@@ -119,7 +121,7 @@ class _PolygonLassoToolClass(selectRegionClass._SelectRegion):
                 self.Selected_Points = []
                 self.isSelected = False
             else:
-                self.Selected_Points.append([[x, y]])
+                self.Selected_Points.append([x, y])
             self.SetCanvasFrame()
 
     # Move when region is selected
