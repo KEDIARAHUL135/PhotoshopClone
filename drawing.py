@@ -64,16 +64,22 @@ def GetLinePoints(Pt1, Pt2):
     if dist == 0:
         return []
         
-    dx = (Pt2[0] - Pt1[0]) / (3 * dist)
-    dy = (Pt2[1] - Pt1[1]) / (3 * dist)
+    dx = (Pt2[0] - Pt1[0]) / dist
+    dy = (Pt2[1] - Pt1[1]) / dist
 
     Points = [[x, y]]
-    while min(Pt1[0], Pt2[0]) <= x <= max(Pt1[0], Pt2[0]) and min(Pt1[1], Pt2[1]) <= y <= max(Pt1[1], Pt2[1]):
+
+    minX = min(Pt1[0], Pt2[0])
+    maxX = max(Pt1[0], Pt2[0])
+    minY = min(Pt1[1], Pt2[1])
+    maxY = max(Pt1[1], Pt2[1])
+    
+    while minX <= x <= maxX and minY <= y <= maxY:
         x += dx
         y += dy
         Pt = [int(x), int(y)]
 
-        if Pt != Points[-1]:
+        if not (Pt[0] == Points[-1][0] and Pt[1] == Points[-1][1]):
             Points.append(Pt)
     
     return Points
@@ -102,13 +108,11 @@ def LineAtAngle(Image, Pt1, Pt2, isDashed):
 
     else:
         for Pt in Points:
-            ColourVal = Image[Pt[1]][Pt[0]]
-
-            if ColourVal[0] <= 127 and ColourVal[1] <= 127 and ColourVal[2] <= 127:
-                Image[Pt[1]][Pt[0]] = [255, 255, 255]
-            else:
-                Image[Pt[1]][Pt[0]] = [0, 0, 0]
-
+            Image[Pt[1]][Pt[0]] = [127, 127, 127]
+            # if (Image[Pt[1]][Pt[0]] <= 127).all():
+            #     Image[Pt[1]][Pt[0]] = [255, 255, 255]
+            # else:
+            #     Image[Pt[1]][Pt[0]] = [0, 0, 0]
 
 
 # Drawing line (currently only horizontal and verticle lines are supported)
