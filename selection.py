@@ -254,7 +254,7 @@ class _MagicWandToolClass(selectRegionClass._SelectRegion):
     def DrawRegion(self):
         if not self.selecting:      # Don't draw if selecting
             Contours= cv2.findContours(self.Mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[-2]
-            cv2.drawContours(self.FrameToShow, Contours, -1, (127, 127, 127), 1)
+            drawing.Com_Contours(self.FrameToShow, Contours)
 
     def KeyPressedInMainLoop(self):
         if self.Key == 84 or self.Key == 116:   # If 'T'/'t' pressed
