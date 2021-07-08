@@ -441,7 +441,11 @@ def MagneticLassoTool(Canvas, window_title):
     hf.Clear()
     # Taking layer numbers user wants to copy
     Canvas.PrintLayerNames()
-    layer_nos_to_copy = AskLayerNumsToCopy(-1, len(Canvas.layers) - 1)
+    if len(Canvas.layers) <= 1:
+        layer_nos_to_copy = [-1]
+        print("\nThe tool will copy the only layer present.")    
+    else:
+        layer_nos_to_copy = AskLayerNumsToCopy(-1, len(Canvas.layers) - 1)
 
     print("\nPress 'Y' to confirm selection and copy it in a new layer else press 'N' to abort.")
     print("You can also used the keys 'W', 'A', 'S', and 'D', to move the")
