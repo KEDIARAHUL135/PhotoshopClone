@@ -190,9 +190,18 @@ def Com_Contours(Image, Contours):
         Sum = 0
         isWhite = True
 
+        if len(Contour[0]) == 1:
+            isExtraAxis = True
+        else:
+            isExtraAxis = False
+
         for i in range(1, len(Contour)):
-            x1, y1 = Contour[i-1]
-            x2, y2 = Contour[i]
+            if isExtraAxis:
+                x1, y1 = Contour[i-1][0]
+                x2, y2 = Contour[i][0]
+            else:
+                x1, y1 = Contour[i-1]
+                x2, y2 = Contour[i]
 
             dist = hf.Distance([x1, y1], [x2, y2])
 
@@ -207,7 +216,11 @@ def Com_Contours(Image, Contours):
                 Sum = 0
             
         # Joining the first and last points
-        x1, y1 = Contour[0]
-        x2, y2 = Contour[-1]
+        if isExtraAxis:
+            x1, y1 = Contour[0][0]
+            x2, y2 = Contour[-1][0]
+        else:
+            x1, y1 = Contour[0]
+            x2, y2 = Contour[-1]
 
         LineAtAngle(Image, [x1, y1], [x2, y2], True)

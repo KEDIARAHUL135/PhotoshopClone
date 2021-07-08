@@ -22,10 +22,8 @@ class _ObjectSelectionToolClass(selectRegionClass._SelectRegion):
     def DrawRegion(self):
         if self.selecting:
             drawing.Rectangle(self.FrameToShow, self.SelectedContours[0][0], self.SelectedContours[0][2])
-            # cv2.drawContours(self.FrameToShow, np.array(self.SelectedContours), -1, (127, 127, 127), 1)
         else:
             drawing.Com_Contours(self.FrameToShow, self.SelectedContours)
-            # cv2.drawContours(self.FrameToShow, self.SelectedContours, -1, (127, 127, 127), 1)
 
     # When mouse left button is pressed
     def Mouse_EVENT_LBUTTONDOWN(self):
@@ -145,7 +143,7 @@ class _QuickSelectionToolClass(selectRegionClass._SelectRegion):
         Mask[(self.RegionMask==cv2.GC_FGD) | (self.RegionMask==cv2.GC_PR_FGD)] = 255
         Contours = cv2.findContours(Mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)[-2]
         if len(Contours) != 0:
-            cv2.drawContours(self.FrameToShow, Contours, -1, (127, 127, 127), 1)
+            drawing.Com_Contours(self.FrameToShow, Contours)
 
     # printing extra instructions
     def PrintInstructions(self):
