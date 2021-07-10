@@ -59,8 +59,7 @@ class _ObjectSelectionToolClass(selectRegionClass._SelectRegion):
         FgBgMask = np.where((Mask==2) | (Mask==0), 0, 1).astype(np.uint8)
 
         # Detecting contours - there can be more than one regions detected
-        Contours = cv2.findContours(FgBgMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
-        self.SelectedContours = hf.RemoveContoursDim(Contours)
+        self.SelectedContours = cv2.findContours(FgBgMask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]
 
     
     # When mouse left button is released
